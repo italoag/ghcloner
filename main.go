@@ -17,6 +17,7 @@ import (
 type Repo struct {
 	Name     string `json:"name"`
 	CloneURL string `json:"clone_url"`
+	Fork     bool   `json:"fork"`
 }
 
 type model struct {
@@ -215,10 +216,16 @@ func fetchRepos(owner, repoType, token string) tea.Cmd {
 				return errorMsg{fmt.Errorf("erro ao decodificar resposta: %v", err)}
 			}
 
+			// Filtrar apenas repositórios que não são forks
+			for _, repo := range pageRepos {
+				if !repo.Fork {
+					repos = append(repos, repo)
+				}
+			}
+
 			if len(pageRepos) == 0 {
 				break
 			}
-			repos = append(repos, pageRepos...)
 			page++
 		}
 
@@ -273,7 +280,7 @@ func main() {
 		fmt.Println("Aviso: Executando sem token do GitHub. Pode haver limitações de rate limiting.")
 	}
 
-	fmt.Printf("Buscando repositórios para %s/%s...\n", repoType, owner)
+	fmt.Printf("Buscando repositórios (somente repositórios originais, não forks) para %s/%s...\n", repoType, owner)
 
 	p := tea.NewProgram(initialModel(owner, repoType, token))
 	if _, err := p.Run(); err != nil {
