@@ -1,4 +1,4 @@
-module github.com/italoag/ghclone
+module github.com/italoag/ghcloner
 
 go 1.24.3
 
