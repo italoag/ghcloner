@@ -23,6 +23,7 @@ type model struct {
 	repos    []Repo
 	current  int
 	total    int
+	skipped  int
 	progress progress.Model
 	quitting bool
 	err      error
@@ -36,6 +37,7 @@ func initialModel(owner, repoType, token string) model {
 		repos:    []Repo{},
 		current:  0,
 		total:    0,
+		skipped:  0,
 		progress: progress.New(progress.WithDefaultGradient()),
 		owner:    owner,
 		repoType: repoType,
@@ -64,7 +66,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.quitting = true
 			return m, tea.Quit
 		}
-		return m, cloneRepo(m.repos[m.current])
+		return m, cloneRepo(m.repos[m.current], m.owner)
 
 	case cloneFinishedMsg:
 		m.current++
@@ -74,7 +76,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		percent := float64(m.current) / float64(m.total)
 		cmd := m.progress.SetPercent(percent)
-		return m, tea.Batch(cmd, cloneRepo(m.repos[m.current]))
+		return m, tea.Batch(cmd, cloneRepo(m.repos[m.current], m.owner))
+
+	case cloneSkippedMsg:
+		m.current++
+		m.skipped++
+		if m.current >= m.total {
+			m.quitting = true
+			return m, tea.Quit
+		}
+		percent := float64(m.current) / float64(m.total)
+		cmd := m.progress.SetPercent(percent)
+		return m, tea.Batch(cmd, cloneRepo(m.repos[m.current], m.owner))
 
 	case progress.FrameMsg:
 		var cmd tea.Cmd
@@ -100,7 +113,13 @@ func (m model) View() string {
 		if m.total == 0 {
 			return "\nNenhum repositório encontrado.\n"
 		}
-		return fmt.Sprintf("\nClonagem concluída: %d repositórios clonados.\n", m.total)
+		cloned := m.total - m.skipped
+		msg := fmt.Sprintf("\nClonagem concluída no diretório '%s': %d repositórios processados", m.owner, m.total)
+		if m.skipped > 0 {
+			msg += fmt.Sprintf(" (%d clonados, %d já existiam)", cloned, m.skipped)
+		}
+		msg += ".\n"
+		return msg
 	}
 
 	// Verificar se há repositórios disponíveis
@@ -114,11 +133,23 @@ func (m model) View() string {
 	}
 
 	bar := m.progress.View()
-	info := fmt.Sprintf("Clonando repositório %d de %d: %s\n", m.current+1, m.total, m.repos[m.current].Name)
+	repoName := m.repos[m.current].Name
+	repoPath := fmt.Sprintf("%s/%s", m.owner, repoName)
+
+	// Verificar se o repositório já existe
+	var status string
+	if _, err := os.Stat(repoPath); err == nil {
+		status = fmt.Sprintf("Pulando repositório %d de %d (já existe): %s", m.current+1, m.total, repoName)
+	} else {
+		status = fmt.Sprintf("Clonando repositório %d de %d: %s", m.current+1, m.total, repoName)
+	}
+
+	info := status + "\n"
 	return lipgloss.NewStyle().Padding(1, 2).Render(info + bar)
 }
 
 type cloneFinishedMsg struct{}
+type cloneSkippedMsg struct{}
 type errorMsg struct{ err error }
 
 func fetchRepos(owner, repoType, token string) tea.Cmd {
@@ -181,9 +212,23 @@ func fetchRepos(owner, repoType, token string) tea.Cmd {
 	}
 }
 
-func cloneRepo(repo Repo) tea.Cmd {
+func cloneRepo(repo Repo, baseDir string) tea.Cmd {
 	return func() tea.Msg {
-		cmd := exec.Command("git", "clone", "--depth=1", "--recurse-submodules", repo.CloneURL)
+		// Criar o diretório base se não existir
+		if err := os.MkdirAll(baseDir, 0755); err != nil {
+			return errorMsg{fmt.Errorf("erro ao criar diretório %s: %v", baseDir, err)}
+		}
+
+		// Caminho completo para o repositório
+		repoPath := fmt.Sprintf("%s/%s", baseDir, repo.Name)
+
+		// Verificar se o repositório já existe
+		if _, err := os.Stat(repoPath); err == nil {
+			// Diretório já existe, pular este repositório
+			return cloneSkippedMsg{}
+		}
+
+		cmd := exec.Command("git", "clone", "--depth=1", "--recurse-submodules", repo.CloneURL, repoPath)
 		// Redirecionar output para evitar poluir a interface do Bubbletea
 		cmd.Stdout = nil
 		cmd.Stderr = nil
