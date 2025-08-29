@@ -19,10 +19,10 @@ import (
 // AppModel represents the main application model
 type AppModel struct {
 	// Dependencies
-	fetchUseCase     *usecases.FetchRepositoriesUseCase
-	cloningService   *services.CloningService
-	progressService  *services.ProgressService
-	logger           shared.Logger
+	fetchUseCase    *usecases.FetchRepositoriesUseCase
+	cloningService  *services.CloningService
+	progressService *services.ProgressService
+	logger          shared.Logger
 
 	// Configuration
 	config *AppConfig
@@ -32,12 +32,12 @@ type AppModel struct {
 	repositories []*repository.Repository
 	progress     progress.Model
 	currentBatch string
-	
+
 	// UI State
-	quitting     bool
-	err          error
-	statusMsg    string
-	
+	quitting  bool
+	err       error
+	statusMsg string
+
 	// Progress tracking
 	progressData *cloning.Progress
 	startTime    time.Time
@@ -217,12 +217,12 @@ func (m *AppModel) handleCloningStarted(msg cloningStartedMsg) (tea.Model, tea.C
 func (m *AppModel) handleProgressUpdate(msg progressUpdateMsg) (tea.Model, tea.Cmd) {
 	if msg.progress != nil {
 		m.progressData = msg.progress
-		
+
 		// Update progress bar
 		if m.progressData.Total > 0 {
 			percentage := float64(m.progressData.Completed+m.progressData.Failed+m.progressData.Skipped) / float64(m.progressData.Total)
 			cmd := m.progress.SetPercent(percentage)
-			
+
 			// Check if cloning is complete
 			if m.progressData.IsComplete() {
 				m.logger.Info("Cloning completed",
@@ -234,7 +234,7 @@ func (m *AppModel) handleProgressUpdate(msg progressUpdateMsg) (tea.Model, tea.C
 					progress: m.progressData,
 				})
 			}
-			
+
 			return m, tea.Batch(cmd, m.progressTickCmd())
 		}
 	}
@@ -461,22 +461,22 @@ func (m *AppModel) View() string {
 	if m.quitting {
 		return "Thanks for using ghclone! Shutting down...\n"
 	}
-	
+
 	var content []string
-	content = append(content, "🚀 ghclone v2.0")
+	content = append(content, "🚀 ghclone v0.2.0")
 	content = append(content, "State: "+m.state.String())
 	content = append(content, "Status: "+m.statusMsg)
-	
+
 	if m.progressData != nil {
 		content = append(content, fmt.Sprintf("Progress: %d/%d completed, %d failed, %d skipped",
 			m.progressData.Completed, m.progressData.Total, m.progressData.Failed, m.progressData.Skipped))
 	}
-	
+
 	if m.err != nil {
 		content = append(content, "Error: "+m.err.Error())
 	}
-	
+
 	content = append(content, "\nPress 'q' to quit")
-	
+
 	return strings.Join(content, "\n")
 }

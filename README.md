@@ -1,4 +1,4 @@
-# ghclone v2.0 - Optimized Concurrent GitHub Repository Cloner
+# ghclone v0.2.0 - Optimized Concurrent GitHub Repository Cloner
 
 ## Overview
 

@@ -447,7 +447,7 @@ func (h *HelpCommand) Usage() string {
 func (h *HelpCommand) Execute(ctx context.Context, args []string) error {
 	if len(args) == 0 {
 		// Show general help
-		fmt.Println("ghclone v2.0 - Concurrent GitHub Repository Cloner")
+		fmt.Println("ghclone v0.2.0 - Concurrent GitHub Repository Cloner")
 		fmt.Println()
 		fmt.Println("USAGE:")
 		fmt.Println("  ghclone <command> [arguments]")
@@ -497,7 +497,7 @@ func (v *VersionCommand) Usage() string {
 
 // Execute executes the version command
 func (v *VersionCommand) Execute(ctx context.Context, args []string) error {
-	fmt.Println("ghclone v2.0.0")
+	fmt.Println("ghclone v0.2.0")
 	fmt.Printf("Go version: %s\n", "go1.24.3")
 	fmt.Println("Optimized with:")
 	fmt.Println("  - Concurrent processing with ants worker pool")

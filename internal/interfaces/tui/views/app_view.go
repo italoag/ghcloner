@@ -53,58 +53,58 @@ func (v *AppView) renderView() string {
 // Styles
 var (
 	titleStyle = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FAFAFA")).
-		Background(lipgloss.Color("#7D56F4")).
-		Padding(0, 1)
+			Bold(true).
+			Foreground(lipgloss.Color("#FAFAFA")).
+			Background(lipgloss.Color("#7D56F4")).
+			Padding(0, 1)
 
 	headerStyle = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#7D56F4")).
-		MarginTop(1).
-		MarginBottom(1)
+			Bold(true).
+			Foreground(lipgloss.Color("#7D56F4")).
+			MarginTop(1).
+			MarginBottom(1)
 
 	infoStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#626262")).
-		MarginLeft(2)
+			Foreground(lipgloss.Color("#626262")).
+			MarginLeft(2)
 
 	successStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#04B575")).
-		Bold(true)
+			Foreground(lipgloss.Color("#04B575")).
+			Bold(true)
 
 	errorStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FF5F87")).
-		Bold(true)
+			Foreground(lipgloss.Color("#FF5F87")).
+			Bold(true)
 
 	warningStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FFAF00")).
-		Bold(true)
+			Foreground(lipgloss.Color("#FFAF00")).
+			Bold(true)
 
 	statusStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#04B575")).
-		MarginLeft(2).
-		MarginBottom(1)
+			Foreground(lipgloss.Color("#04B575")).
+			MarginLeft(2).
+			MarginBottom(1)
 
 	progressStyle = lipgloss.NewStyle().
-		MarginLeft(2).
-		MarginTop(1).
-		MarginBottom(1)
+			MarginLeft(2).
+			MarginTop(1).
+			MarginBottom(1)
 
 	statsStyle = lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("#874BFD")).
-		Padding(1, 2).
-		MarginTop(1)
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("#874BFD")).
+			Padding(1, 2).
+			MarginTop(1)
 
 	helpStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#626262")).
-		MarginTop(2)
+			Foreground(lipgloss.Color("#626262")).
+			MarginTop(2)
 )
 
 // renderInitializing renders the initializing state
 func (v *AppView) renderInitializing() string {
 	return lipgloss.JoinVertical(lipgloss.Left,
-		titleStyle.Render("🚀 ghclone v2.0"),
+		titleStyle.Render("🚀 ghclone v0.2.0"),
 		headerStyle.Render("Initializing Application"),
 		infoStyle.Render("Setting up concurrent repository cloner..."),
 		helpStyle.Render("Press 'q' to quit"),
@@ -114,7 +114,7 @@ func (v *AppView) renderInitializing() string {
 // renderFetching renders the repository fetching state
 func (v *AppView) renderFetching() string {
 	return lipgloss.JoinVertical(lipgloss.Left,
-		titleStyle.Render("🚀 ghclone v2.0"),
+		titleStyle.Render("🚀 ghclone v0.2.0"),
 		headerStyle.Render("Fetching Repositories"),
 		infoStyle.Render("Retrieving repository list from GitHub..."),
 		statusStyle.Render("⏳ Please wait while we fetch the repositories"),
@@ -125,9 +125,9 @@ func (v *AppView) renderFetching() string {
 // renderRepositoriesFetched renders the state after repositories are fetched
 func (v *AppView) renderRepositoriesFetched() string {
 	count := v.model.GetRepositoryCount()
-	
+
 	return lipgloss.JoinVertical(lipgloss.Left,
-		titleStyle.Render("🚀 ghclone v2.0"),
+		titleStyle.Render("🚀 ghclone v0.2.0"),
 		headerStyle.Render("Repositories Found"),
 		successStyle.Render(fmt.Sprintf("✓ Found %d repositories", count)),
 		infoStyle.Render("Starting concurrent cloning..."),
@@ -138,35 +138,35 @@ func (v *AppView) renderRepositoriesFetched() string {
 // renderCloning renders the cloning state with progress
 func (v *AppView) renderCloning() string {
 	progress := v.model.GetProgress()
-	
+
 	var content []string
-	content = append(content, titleStyle.Render("🚀 ghclone v2.0"))
+	content = append(content, titleStyle.Render("🚀 ghclone v20..0"))
 	content = append(content, headerStyle.Render("Cloning Repositories"))
-	
+
 	if progress != nil {
 		// Progress bar
 		progressBar := v.model.GetProgressView()
 		content = append(content, progressStyle.Render(progressBar))
-		
+
 		// Statistics
 		stats := v.renderProgressStats(progress)
 		content = append(content, stats)
-		
+
 		// Current status
 		status := v.renderCurrentStatus(progress)
 		content = append(content, status)
 	} else {
 		content = append(content, infoStyle.Render("Initializing cloning process..."))
 	}
-	
+
 	// Elapsed time
 	elapsed := v.model.GetElapsedTime()
 	if elapsed > 0 {
 		content = append(content, infoStyle.Render(fmt.Sprintf("Elapsed: %v", elapsed.Truncate(time.Second))))
 	}
-	
+
 	content = append(content, helpStyle.Render("Press 'q' to quit"))
-	
+
 	return lipgloss.JoinVertical(lipgloss.Left, content...)
 }
 
@@ -174,19 +174,19 @@ func (v *AppView) renderCloning() string {
 func (v *AppView) renderComplete() string {
 	progress := v.model.GetProgress()
 	elapsed := v.model.GetElapsedTime()
-	
+
 	var content []string
-	content = append(content, titleStyle.Render("🚀 ghclone v2.0"))
+	content = append(content, titleStyle.Render("🚀 ghclone v0.2.0"))
 	content = append(content, headerStyle.Render("Cloning Completed"))
-	
+
 	if progress != nil {
 		// Success message
 		content = append(content, successStyle.Render("✓ All repositories processed!"))
-		
+
 		// Final statistics
 		stats := v.renderFinalStats(progress, elapsed)
 		content = append(content, stats)
-		
+
 		// Success rate
 		if progress.Failed > 0 {
 			successRate := progress.GetSuccessRate()
@@ -199,23 +199,23 @@ func (v *AppView) renderComplete() string {
 			}
 		}
 	}
-	
+
 	content = append(content, helpStyle.Render("Press 'q' to quit, 'r' to restart"))
-	
+
 	return lipgloss.JoinVertical(lipgloss.Left, content...)
 }
 
 // renderError renders the error state
 func (v *AppView) renderError() string {
 	err := v.model.GetError()
-	
+
 	var content []string
-	content = append(content, titleStyle.Render("🚀 ghclone v2.0"))
+	content = append(content, titleStyle.Render("🚀 ghclone v0.2.0"))
 	content = append(content, headerStyle.Render("Error"))
-	
+
 	if err != nil {
 		content = append(content, errorStyle.Render("✗ "+err.Error()))
-		
+
 		// Specific error handling
 		switch err.(type) {
 		case *models.NoRepositoriesError:
@@ -227,16 +227,16 @@ func (v *AppView) renderError() string {
 			content = append(content, infoStyle.Render("Please check your configuration and try again"))
 		}
 	}
-	
+
 	content = append(content, helpStyle.Render("Press 'q' to quit, 'r' to restart"))
-	
+
 	return lipgloss.JoinVertical(lipgloss.Left, content...)
 }
 
 // renderQuitting renders the quitting state
 func (v *AppView) renderQuitting() string {
 	return lipgloss.JoinVertical(lipgloss.Left,
-		titleStyle.Render("🚀 ghclone v2.0"),
+		titleStyle.Render("🚀 ghclone v0.2.0"),
 		headerStyle.Render("Shutting Down"),
 		infoStyle.Render("Thanks for using ghclone!"),
 		infoStyle.Render("Cleaning up resources..."),
@@ -246,7 +246,7 @@ func (v *AppView) renderQuitting() string {
 // renderUnknown renders unknown states
 func (v *AppView) renderUnknown() string {
 	return lipgloss.JoinVertical(lipgloss.Left,
-		titleStyle.Render("🚀 ghclone v2.0"),
+		titleStyle.Render("🚀 ghclone v0.2.0"),
 		errorStyle.Render("Unknown state"),
 		helpStyle.Render("Press 'q' to quit"),
 	)
@@ -256,10 +256,10 @@ func (v *AppView) renderUnknown() string {
 func (v *AppView) renderProgressStats(progress *cloning.Progress) string {
 	stats := fmt.Sprintf(
 		"Progress: %d/%d repositories\n"+
-		"✓ Completed: %d\n"+
-		"✗ Failed: %d\n"+
-		"⏭ Skipped: %d\n"+
-		"⏳ In Progress: %d",
+			"✓ Completed: %d\n"+
+			"✗ Failed: %d\n"+
+			"⏭ Skipped: %d\n"+
+			"⏳ In Progress: %d",
 		progress.Completed+progress.Failed+progress.Skipped,
 		progress.Total,
 		progress.Completed,
@@ -267,24 +267,24 @@ func (v *AppView) renderProgressStats(progress *cloning.Progress) string {
 		progress.Skipped,
 		progress.InProgress,
 	)
-	
+
 	return statsStyle.Render(stats)
 }
 
 // renderCurrentStatus renders current cloning status
 func (v *AppView) renderCurrentStatus(progress *cloning.Progress) string {
 	percentage := progress.GetPercentage()
-	
+
 	status := fmt.Sprintf("%.1f%% complete", percentage)
-	
+
 	if progress.ETA > 0 {
 		status += fmt.Sprintf(" • ETA: %v", progress.ETA.Truncate(time.Second))
 	}
-	
+
 	if progress.Throughput > 0 {
 		status += fmt.Sprintf(" • %.1f repos/sec", progress.Throughput)
 	}
-	
+
 	return statusStyle.Render(status)
 }
 
@@ -292,24 +292,24 @@ func (v *AppView) renderCurrentStatus(progress *cloning.Progress) string {
 func (v *AppView) renderFinalStats(progress *cloning.Progress, elapsed time.Duration) string {
 	stats := fmt.Sprintf(
 		"Final Results:\n"+
-		"📊 Total Repositories: %d\n"+
-		"✅ Successfully Cloned: %d\n"+
-		"❌ Failed: %d\n"+
-		"⏭️ Skipped (already existed): %d\n"+
-		"⏱️ Total Time: %v",
+			"📊 Total Repositories: %d\n"+
+			"✅ Successfully Cloned: %d\n"+
+			"❌ Failed: %d\n"+
+			"⏭️ Skipped (already existed): %d\n"+
+			"⏱️ Total Time: %v",
 		progress.Total,
 		progress.Completed,
 		progress.Failed,
 		progress.Skipped,
 		elapsed.Truncate(time.Second),
 	)
-	
+
 	// Add average time per repository
 	if progress.Completed > 0 && elapsed > 0 {
 		avgTime := elapsed / time.Duration(progress.Completed)
 		stats += fmt.Sprintf("\n⚡ Average Time per Repository: %v", avgTime.Truncate(time.Millisecond*100))
 	}
-	
+
 	return statsStyle.Render(stats)
 }
 
@@ -320,17 +320,17 @@ func formatDuration(d time.Duration) string {
 	if d < time.Second {
 		return "< 1s"
 	}
-	
+
 	if d < time.Minute {
 		return fmt.Sprintf("%ds", int(d.Seconds()))
 	}
-	
+
 	if d < time.Hour {
 		minutes := int(d.Minutes())
 		seconds := int(d.Seconds()) % 60
 		return fmt.Sprintf("%dm %ds", minutes, seconds)
 	}
-	
+
 	hours := int(d.Hours())
 	minutes := int(d.Minutes()) % 60
 	return fmt.Sprintf("%dh %dm", hours, minutes)
@@ -342,13 +342,13 @@ func formatSize(bytes int64) string {
 	if bytes < unit {
 		return fmt.Sprintf("%d B", bytes)
 	}
-	
+
 	div, exp := int64(unit), 0
 	for n := bytes / unit; n >= unit; n /= unit {
 		div *= unit
 		exp++
 	}
-	
+
 	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
 }
 
@@ -373,9 +373,9 @@ func getStatusColor(completed, failed, total int) lipgloss.Color {
 	if total == 0 {
 		return lipgloss.Color("#626262")
 	}
-	
+
 	successRate := float64(completed) / float64(completed+failed) * 100
-	
+
 	switch {
 	case successRate >= 95:
 		return lipgloss.Color("#04B575") // Green
@@ -391,22 +391,22 @@ func (v *AppView) renderEnhancedProgress(progress *cloning.Progress) string {
 	if progress == nil {
 		return infoStyle.Render("Initializing...")
 	}
-	
+
 	emoji := getProgressEmoji(progress.GetPercentage())
 	percentage := progress.GetPercentage()
-	
+
 	// Create a visual progress bar
 	barWidth := 40
 	filledWidth := int(percentage / 100 * float64(barWidth))
 	emptyWidth := barWidth - filledWidth
-	
+
 	bar := strings.Repeat("█", filledWidth) + strings.Repeat("░", emptyWidth)
-	
+
 	progressText := fmt.Sprintf("%s [%s] %.1f%%", emoji, bar, percentage)
-	
+
 	// Color the bar based on status
 	color := getStatusColor(progress.Completed, progress.Failed, progress.Total)
 	styledBar := lipgloss.NewStyle().Foreground(color).Render(progressText)
-	
+
 	return progressStyle.Render(styledBar)
 }

@@ -80,7 +80,7 @@ func (app *CLIApplication) Execute(args []string) error {
 
 // showUsage shows general usage information
 func (app *CLIApplication) showUsage() error {
-	fmt.Println("ghclone v2.0 - Concurrent GitHub Repository Cloner")
+	fmt.Println("ghclone v0.2.0 - Concurrent GitHub Repository Cloner")
 	fmt.Println()
 	fmt.Println("USAGE:")
 	fmt.Println("  ghclone <command> [arguments]")
@@ -371,7 +371,7 @@ func (c *CloneCommand) executeClone(ctx context.Context, config *CloneConfig) er
 		return fmt.Errorf("failed to start cloning: %w", err)
 	}
 
-	fmt.Printf("Submitted %d jobs for concurrent cloning with %d workers\n", 
+	fmt.Printf("Submitted %d jobs for concurrent cloning with %d workers\n",
 		cloneResp.SubmittedJobs, config.Concurrency)
 
 	// Monitor progress
@@ -394,7 +394,7 @@ func (c *CloneCommand) monitorProgress(ctx context.Context, service *services.Cl
 			}
 
 			// Only print if progress changed
-			if lastProgress == nil || 
+			if lastProgress == nil ||
 				progress.Completed != lastProgress.Completed ||
 				progress.Failed != lastProgress.Failed ||
 				progress.Skipped != lastProgress.Skipped {
@@ -411,7 +411,7 @@ func (c *CloneCommand) monitorProgress(ctx context.Context, service *services.Cl
 				fmt.Printf("Results: %d successful, %d failed, %d skipped out of %d total\n",
 					progress.Completed, progress.Failed, progress.Skipped, progress.Total)
 				fmt.Printf("Total time: %v\n", progress.ElapsedTime.Truncate(time.Second))
-				
+
 				if progress.Failed > 0 {
 					fmt.Printf("Success rate: %.1f%%\n", progress.GetSuccessRate())
 				}
