@@ -114,7 +114,11 @@ func runCloneCommand(cmd *cobra.Command, args []string, cloneConfig *CloneConfig
 	if err != nil {
 		return fmt.Errorf("failed to initialize application: %w", err)
 	}
-	defer app.Close()
+	defer func() {
+		if err := app.Close(); err != nil {
+			app.logger.Warn("failed to close application", shared.ErrorField(err))
+		}
+	}()
 
 	// Show configuration info before starting TUI
 	fmt.Printf("ghclone v0.2.0 - Concurrent GitHub Repository Cloner\n")
@@ -154,13 +158,10 @@ type cloneTUIModel struct {
 	cloneConfig     *CloneConfig
 	globalConfig    *Config
 	repos           []*repository.Repository
-	current         int
 	total           int
 	progress        progress.Model
 	quitting        bool
 	err             error
-	progressTracker *cloning.ProgressTracker
-	useCase         *usecases.CloneRepositoriesUseCase
 	tuiLogger       *logging.TUILogger
 	logHeight       int
 	showLogs        bool
@@ -275,8 +276,6 @@ func (m cloneTUIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	default:
 		return m, nil
 	}
-
-	return m, nil
 }
 
 func (m cloneTUIModel) View() string {

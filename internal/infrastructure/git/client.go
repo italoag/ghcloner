@@ -15,17 +15,17 @@ import (
 
 // GitClient handles Git operations
 type GitClient struct {
-	gitPath    string
-	timeout    time.Duration
-	logger     shared.Logger
-	validator  *GitValidator
+	gitPath   string
+	timeout   time.Duration
+	logger    shared.Logger
+	validator *GitValidator
 }
 
 // GitClientConfig holds configuration for Git client
 type GitClientConfig struct {
-	GitPath   string
-	Timeout   time.Duration
-	Logger    shared.Logger
+	GitPath string
+	Timeout time.Duration
+	Logger  shared.Logger
 }
 
 // NewGitClient creates a new Git client
@@ -68,7 +68,7 @@ func (g *GitClient) CloneRepository(ctx context.Context, job *cloning.CloneJob) 
 				shared.StringField("path", destPath))
 			return &RepositoryExistsError{Path: destPath}
 		}
-		
+
 		// Remove existing directory if not skipping
 		if err := os.RemoveAll(destPath); err != nil {
 			return fmt.Errorf("failed to remove existing repository: %w", err)

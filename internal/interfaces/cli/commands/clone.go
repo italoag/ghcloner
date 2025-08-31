@@ -297,7 +297,7 @@ func (c *CloneCommand) executeClone(ctx context.Context, config *CloneConfig) er
 
 	// Validate Git installation
 	if err := gitClient.ValidateGitInstallation(ctx); err != nil {
-		return fmt.Errorf("Git validation failed: %w", err)
+		return fmt.Errorf("git validation failed: %w", err)
 	}
 
 	// Initialize worker pool
@@ -311,7 +311,11 @@ func (c *CloneCommand) executeClone(ctx context.Context, config *CloneConfig) er
 	if err != nil {
 		return fmt.Errorf("failed to create worker pool: %w", err)
 	}
-	defer workerPool.Close()
+	defer func() {
+		if err := workerPool.Close(); err != nil {
+			c.logger.Warn("failed to close worker pool", shared.ErrorField(err))
+		}
+	}()
 
 	// Initialize services
 	fetchUseCase := usecases.NewFetchRepositoriesUseCase(githubClient, logger)
@@ -323,7 +327,11 @@ func (c *CloneCommand) executeClone(ctx context.Context, config *CloneConfig) er
 	if err != nil {
 		return fmt.Errorf("failed to create cloning service: %w", err)
 	}
-	defer cloningService.Close()
+	defer func() {
+		if err := cloningService.Close(); err != nil {
+			c.logger.Warn("failed to close cloning service", shared.ErrorField(err))
+		}
+	}()
 
 	// Fetch repositories
 	filter := repository.NewRepositoryFilter()

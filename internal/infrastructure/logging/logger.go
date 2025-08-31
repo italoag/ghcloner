@@ -14,9 +14,9 @@ import (
 
 // LogEntry represents a single log entry for TUI display
 type LogEntry struct {
-	Timestamp time.Time         `json:"timestamp"`
-	Level     string            `json:"level"`
-	Message   string            `json:"message"`
+	Timestamp time.Time              `json:"timestamp"`
+	Level     string                 `json:"level"`
+	Message   string                 `json:"message"`
 	Fields    map[string]interface{} `json:"fields"`
 }
 
@@ -50,10 +50,10 @@ func NewLogBuffer(size int) *LogBuffer {
 func (lb *LogBuffer) Add(entry LogEntry) {
 	lb.mutex.Lock()
 	defer lb.mutex.Unlock()
-	
+
 	lb.entries[lb.current] = entry
 	lb.current = (lb.current + 1) % lb.size
-	
+
 	// Notify listeners of new entry
 	select {
 	case lb.notify <- struct{}{}:
@@ -65,24 +65,24 @@ func (lb *LogBuffer) Add(entry LogEntry) {
 func (lb *LogBuffer) GetRecent(limit int) []LogEntry {
 	lb.mutex.RLock()
 	defer lb.mutex.RUnlock()
-	
+
 	if limit <= 0 || limit > lb.size {
 		limit = lb.size
 	}
-	
+
 	var result []LogEntry
-	
+
 	// Start from the oldest entry and collect up to limit entries
 	for i := 0; i < limit; i++ {
 		idx := (lb.current - limit + i + lb.size) % lb.size
 		entry := lb.entries[idx]
-		
+
 		// Skip empty entries (buffer not yet full)
 		if !entry.Timestamp.IsZero() {
 			result = append(result, entry)
 		}
 	}
-	
+
 	return result
 }
 
@@ -95,7 +95,7 @@ func (lb *LogBuffer) GetNotifyChannel() <-chan struct{} {
 func (lb *LogBuffer) Clear() {
 	lb.mutex.Lock()
 	defer lb.mutex.Unlock()
-	
+
 	lb.entries = make([]LogEntry, lb.size)
 	lb.current = 0
 }
@@ -155,11 +155,12 @@ func NewZapLogger(config *LoggerConfig) (*ZapLogger, error) {
 	// Create writers
 	var writers []zapcore.WriteSyncer
 	for _, path := range config.OutputPaths {
-		if path == "stdout" {
+		switch path {
+		case "stdout":
 			writers = append(writers, zapcore.AddSync(os.Stdout))
-		} else if path == "stderr" {
+		case "stderr":
 			writers = append(writers, zapcore.AddSync(os.Stderr))
-		} else {
+		default:
 			file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 			if err != nil {
 				return nil, fmt.Errorf("failed to open log file %s: %w", path, err)
@@ -385,7 +386,7 @@ func ensureLogFileDir(logFile string) error {
 			break
 		}
 	}
-	
+
 	if dir != "" {
 		return os.MkdirAll(dir, 0755)
 	}

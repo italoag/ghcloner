@@ -26,7 +26,7 @@ func TestNewCloneJob(t *testing.T) {
 
 func TestCloneJob_GetDestinationPath(t *testing.T) {
 	repo := createTestRepository()
-	
+
 	tests := []struct {
 		name      string
 		baseDir   string
@@ -51,7 +51,7 @@ func TestCloneJob_GetDestinationPath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			options := NewDefaultCloneOptions()
 			options.CreateOrgDirs = tt.createOrg
-			
+
 			job := NewCloneJob(repo, tt.baseDir, options)
 			assert.Equal(t, tt.expected, job.GetDestinationPath())
 		})
@@ -80,10 +80,10 @@ func TestCloneJob_CanRetry(t *testing.T) {
 
 func TestCloneJob_MarkStarted(t *testing.T) {
 	job := NewCloneJob(createTestRepository(), "/tmp", NewDefaultCloneOptions())
-	
+
 	startTime := time.Now()
 	job.MarkStarted()
-	
+
 	assert.Equal(t, JobStatusRunning, job.Status)
 	assert.WithinDuration(t, startTime, job.StartedAt, time.Second)
 }
@@ -91,10 +91,10 @@ func TestCloneJob_MarkStarted(t *testing.T) {
 func TestCloneJob_MarkCompleted(t *testing.T) {
 	job := NewCloneJob(createTestRepository(), "/tmp", NewDefaultCloneOptions())
 	job.MarkStarted()
-	
+
 	completedTime := time.Now()
 	job.MarkCompleted()
-	
+
 	assert.Equal(t, JobStatusCompleted, job.Status)
 	assert.WithinDuration(t, completedTime, job.CompletedAt, time.Second)
 	assert.NoError(t, job.Error)
@@ -103,11 +103,11 @@ func TestCloneJob_MarkCompleted(t *testing.T) {
 func TestCloneJob_MarkFailed(t *testing.T) {
 	job := NewCloneJob(createTestRepository(), "/tmp", NewDefaultCloneOptions())
 	job.MarkStarted()
-	
+
 	testError := assert.AnError
 	failedTime := time.Now()
 	job.MarkFailed(testError)
-	
+
 	assert.Equal(t, JobStatusFailed, job.Status)
 	assert.WithinDuration(t, failedTime, job.CompletedAt, time.Second)
 	assert.Equal(t, testError, job.Error)
@@ -115,11 +115,11 @@ func TestCloneJob_MarkFailed(t *testing.T) {
 
 func TestCloneJob_MarkSkipped(t *testing.T) {
 	job := NewCloneJob(createTestRepository(), "/tmp", NewDefaultCloneOptions())
-	
+
 	reason := "repository already exists"
 	skippedTime := time.Now()
 	job.MarkSkipped(reason)
-	
+
 	assert.Equal(t, JobStatusSkipped, job.Status)
 	assert.WithinDuration(t, skippedTime, job.CompletedAt, time.Second)
 	assert.Contains(t, job.Error.Error(), reason)
@@ -128,10 +128,10 @@ func TestCloneJob_MarkSkipped(t *testing.T) {
 func TestCloneJob_Retry(t *testing.T) {
 	job := NewCloneJob(createTestRepository(), "/tmp", NewDefaultCloneOptions())
 	job.MarkFailed(assert.AnError)
-	
+
 	initialRetryCount := job.RetryCount
 	job.Retry()
-	
+
 	assert.Equal(t, initialRetryCount+1, job.RetryCount)
 	assert.Equal(t, JobStatusPending, job.Status)
 	assert.NoError(t, job.Error)
@@ -139,16 +139,16 @@ func TestCloneJob_Retry(t *testing.T) {
 
 func TestCloneJob_Duration(t *testing.T) {
 	job := NewCloneJob(createTestRepository(), "/tmp", NewDefaultCloneOptions())
-	
+
 	// Before starting
 	assert.Equal(t, time.Duration(0), job.Duration())
-	
+
 	// After starting
 	job.MarkStarted()
 	time.Sleep(10 * time.Millisecond)
 	duration := job.Duration()
 	assert.True(t, duration > 0)
-	
+
 	// After completion
 	job.MarkCompleted()
 	finalDuration := job.Duration()
@@ -160,9 +160,9 @@ func TestCloneJob_ShouldSkipExisting(t *testing.T) {
 	// For now, we'll test the basic logic
 	options := NewDefaultCloneOptions()
 	options.SkipExisting = true
-	
+
 	job := NewCloneJob(createTestRepository(), "/tmp", options)
-	
+
 	// Without actual directory, should return false
 	assert.False(t, job.ShouldSkipExisting())
 }
@@ -231,12 +231,12 @@ func TestNewJobResult(t *testing.T) {
 	job.MarkStarted()
 	time.Sleep(10 * time.Millisecond)
 	job.MarkCompleted()
-	
+
 	success := true
 	bytesSize := int64(1024)
-	
+
 	result := NewJobResult(job, success, bytesSize)
-	
+
 	assert.Equal(t, job, result.Job)
 	assert.Equal(t, success, result.Success)
 	assert.Equal(t, bytesSize, result.BytesSize)

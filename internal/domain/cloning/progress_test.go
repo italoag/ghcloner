@@ -128,40 +128,40 @@ func TestProgress_GetSuccessRate(t *testing.T) {
 
 func TestProgress_IsComplete(t *testing.T) {
 	tests := []struct {
-		name        string
-		total       int
-		completed   int
-		failed      int
-		skipped     int
-		inProgress  int
-		expected    bool
+		name       string
+		total      int
+		completed  int
+		failed     int
+		skipped    int
+		inProgress int
+		expected   bool
 	}{
 		{
-			name:        "not complete",
-			total:       10,
-			completed:   3,
-			failed:      1,
-			skipped:     1,
-			inProgress:  2,
-			expected:    false,
+			name:       "not complete",
+			total:      10,
+			completed:  3,
+			failed:     1,
+			skipped:    1,
+			inProgress: 2,
+			expected:   false,
 		},
 		{
-			name:        "complete",
-			total:       10,
-			completed:   6,
-			failed:      2,
-			skipped:     2,
-			inProgress:  0,
-			expected:    true,
+			name:       "complete",
+			total:      10,
+			completed:  6,
+			failed:     2,
+			skipped:    2,
+			inProgress: 0,
+			expected:   true,
 		},
 		{
-			name:        "over complete",
-			total:       10,
-			completed:   8,
-			failed:      2,
-			skipped:     2,
-			inProgress:  0,
-			expected:    true,
+			name:       "over complete",
+			total:      10,
+			completed:  8,
+			failed:     2,
+			skipped:    2,
+			inProgress: 0,
+			expected:   true,
 		},
 	}
 
@@ -183,9 +183,9 @@ func TestProgress_CalculateETA(t *testing.T) {
 	progress := NewProgress(10)
 	progress.StartTime = time.Now().Add(-1 * time.Minute)
 	progress.Completed = 5
-	
+
 	progress.CalculateETA()
-	
+
 	assert.True(t, progress.ETA > 0)
 	assert.True(t, progress.Throughput > 0)
 }
@@ -202,9 +202,9 @@ func TestNewProgressTracker(t *testing.T) {
 
 func TestProgressTracker_StartJob(t *testing.T) {
 	tracker := NewProgressTracker(5)
-	
+
 	tracker.StartJob()
-	
+
 	progress := tracker.GetProgress()
 	assert.Equal(t, 1, progress.InProgress)
 }
@@ -212,9 +212,9 @@ func TestProgressTracker_StartJob(t *testing.T) {
 func TestProgressTracker_CompleteJob(t *testing.T) {
 	tracker := NewProgressTracker(5)
 	tracker.StartJob()
-	
+
 	tracker.CompleteJob()
-	
+
 	progress := tracker.GetProgress()
 	assert.Equal(t, 1, progress.Completed)
 	assert.Equal(t, 0, progress.InProgress)
@@ -223,9 +223,9 @@ func TestProgressTracker_CompleteJob(t *testing.T) {
 func TestProgressTracker_FailJob(t *testing.T) {
 	tracker := NewProgressTracker(5)
 	tracker.StartJob()
-	
+
 	tracker.FailJob()
-	
+
 	progress := tracker.GetProgress()
 	assert.Equal(t, 1, progress.Failed)
 	assert.Equal(t, 0, progress.InProgress)
@@ -234,9 +234,9 @@ func TestProgressTracker_FailJob(t *testing.T) {
 func TestProgressTracker_SkipJob(t *testing.T) {
 	tracker := NewProgressTracker(5)
 	tracker.StartJob()
-	
+
 	tracker.SkipJob()
-	
+
 	progress := tracker.GetProgress()
 	assert.Equal(t, 1, progress.Skipped)
 	assert.Equal(t, 0, progress.InProgress)
@@ -244,12 +244,12 @@ func TestProgressTracker_SkipJob(t *testing.T) {
 
 func TestProgressTracker_Subscribe(t *testing.T) {
 	tracker := NewProgressTracker(5)
-	
+
 	updates := tracker.Subscribe()
-	
+
 	// Start a job to trigger an update
 	tracker.StartJob()
-	
+
 	// Should receive an update
 	select {
 	case progress := <-updates:
@@ -262,9 +262,9 @@ func TestProgressTracker_Subscribe(t *testing.T) {
 func TestProgressTracker_Close(t *testing.T) {
 	tracker := NewProgressTracker(5)
 	updates := tracker.Subscribe()
-	
+
 	tracker.Close()
-	
+
 	// Channel should be closed
 	select {
 	case _, ok := <-updates:
@@ -276,9 +276,9 @@ func TestProgressTracker_Close(t *testing.T) {
 
 func TestNewBatchProgress(t *testing.T) {
 	batchProgress := NewBatchProgress()
-	
+
 	assert.NotNil(t, batchProgress)
-	
+
 	// Should be empty initially
 	overall := batchProgress.GetOverallProgress()
 	assert.Equal(t, 0, overall.Total)
@@ -288,11 +288,11 @@ func TestBatchProgress_AddBatch(t *testing.T) {
 	batchProgress := NewBatchProgress()
 	batchID := "test-batch"
 	total := 10
-	
+
 	tracker := batchProgress.AddBatch(batchID, total)
-	
+
 	assert.NotNil(t, tracker)
-	
+
 	// Should be able to retrieve the batch
 	retrievedTracker := batchProgress.GetBatch(batchID)
 	assert.Equal(t, tracker, retrievedTracker)
@@ -300,19 +300,19 @@ func TestBatchProgress_AddBatch(t *testing.T) {
 
 func TestBatchProgress_GetOverallProgress(t *testing.T) {
 	batchProgress := NewBatchProgress()
-	
+
 	// Add multiple batches
 	tracker1 := batchProgress.AddBatch("batch1", 5)
 	tracker2 := batchProgress.AddBatch("batch2", 3)
-	
+
 	// Complete some jobs
 	tracker1.StartJob()
 	tracker1.CompleteJob()
 	tracker2.StartJob()
 	tracker2.FailJob()
-	
+
 	overall := batchProgress.GetOverallProgress()
-	
+
 	assert.Equal(t, 8, overall.Total)
 	assert.Equal(t, 1, overall.Completed)
 	assert.Equal(t, 1, overall.Failed)
@@ -321,11 +321,11 @@ func TestBatchProgress_GetOverallProgress(t *testing.T) {
 func TestBatchProgress_RemoveBatch(t *testing.T) {
 	batchProgress := NewBatchProgress()
 	batchID := "test-batch"
-	
+
 	batchProgress.AddBatch(batchID, 5)
-	
+
 	batchProgress.RemoveBatch(batchID)
-	
+
 	// Should no longer exist
 	tracker := batchProgress.GetBatch(batchID)
 	assert.Nil(t, tracker)
@@ -333,13 +333,13 @@ func TestBatchProgress_RemoveBatch(t *testing.T) {
 
 func TestBatchProgress_Close(t *testing.T) {
 	batchProgress := NewBatchProgress()
-	
+
 	// Add some batches
 	batchProgress.AddBatch("batch1", 5)
 	batchProgress.AddBatch("batch2", 3)
-	
+
 	batchProgress.Close()
-	
+
 	// All batches should be removed
 	overall := batchProgress.GetOverallProgress()
 	assert.Equal(t, 0, overall.Total)
@@ -348,10 +348,10 @@ func TestBatchProgress_Close(t *testing.T) {
 // Test concurrent access to progress tracker
 func TestProgressTracker_ConcurrentAccess(t *testing.T) {
 	tracker := NewProgressTracker(100)
-	
+
 	// Start multiple goroutines that update progress
 	done := make(chan bool)
-	
+
 	// Workers completing jobs
 	go func() {
 		for i := 0; i < 50; i++ {
@@ -360,7 +360,7 @@ func TestProgressTracker_ConcurrentAccess(t *testing.T) {
 		}
 		done <- true
 	}()
-	
+
 	// Workers failing jobs
 	go func() {
 		for i := 0; i < 30; i++ {
@@ -369,7 +369,7 @@ func TestProgressTracker_ConcurrentAccess(t *testing.T) {
 		}
 		done <- true
 	}()
-	
+
 	// Workers skipping jobs
 	go func() {
 		for i := 0; i < 20; i++ {
@@ -378,12 +378,12 @@ func TestProgressTracker_ConcurrentAccess(t *testing.T) {
 		}
 		done <- true
 	}()
-	
+
 	// Wait for all workers to complete
 	for i := 0; i < 3; i++ {
 		<-done
 	}
-	
+
 	progress := tracker.GetProgress()
 	assert.Equal(t, 50, progress.Completed)
 	assert.Equal(t, 30, progress.Failed)

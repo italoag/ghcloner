@@ -45,7 +45,7 @@ func NewCloningService(config *CloningServiceConfig) (*CloningService, error) {
 		return nil, fmt.Errorf("logger is required")
 	}
 
-	domainService := cloning.NewDomainCloneService()
+	domainService := cloning.NewDomainCloneService(config.Logger.With(shared.StringField("component", "domain_service")))
 	jobManager := concurrency.NewJobManager(config.WorkerPool, config.Logger)
 
 	return &CloningService{
@@ -123,7 +123,7 @@ func (s *CloningService) CloneBatch(
 
 		// Determine job priority
 		priority := s.domainService.CalculateJobPriority(job)
-		
+
 		var err error
 		if priority > 5 {
 			err = s.jobManager.SubmitHighPriorityJob(job)
@@ -238,7 +238,7 @@ func (s *CloningService) CloneSingle(
 				currentJob.Status == cloning.JobStatusSkipped {
 
 				duration := time.Since(startTime)
-				
+
 				s.mu.Lock()
 				delete(s.activeJobs, job.ID)
 				s.mu.Unlock()
@@ -275,7 +275,7 @@ func (s *CloningService) CloneSingle(
 func (s *CloningService) GetProgress() *cloning.Progress {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	if s.progressTracker != nil {
 		return s.progressTracker.GetProgress()
 	}

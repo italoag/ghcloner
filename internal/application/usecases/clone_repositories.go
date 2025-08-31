@@ -22,13 +22,13 @@ type CloneRepositoriesRequest struct {
 
 // CloneRepositoriesResponse represents the output of cloning repositories
 type CloneRepositoriesResponse struct {
-	TotalJobs       int
-	CompletedJobs   int
-	FailedJobs      int
-	SkippedJobs     int
-	TotalDuration   time.Duration
-	Results         []*cloning.JobResult
-	Progress        *cloning.Progress
+	TotalJobs     int
+	CompletedJobs int
+	FailedJobs    int
+	SkippedJobs   int
+	TotalDuration time.Duration
+	Results       []*cloning.JobResult
+	Progress      *cloning.Progress
 }
 
 // CloneRepositoriesUseCase handles the business logic for cloning multiple repositories
@@ -104,7 +104,7 @@ func (uc *CloneRepositoriesUseCase) Execute(
 
 	// Ensure final progress update shows 100% completion
 	finalProgress := progressTracker.GetProgress()
-	
+
 	// Log progress state for debugging
 	uc.logger.Info("Progress state after worker pool completion",
 		shared.IntField("total", finalProgress.Total),
@@ -112,7 +112,7 @@ func (uc *CloneRepositoriesUseCase) Execute(
 		shared.IntField("failed", finalProgress.Failed),
 		shared.IntField("skipped", finalProgress.Skipped),
 		shared.IntField("in_progress", finalProgress.InProgress))
-	
+
 	// Force completion if somehow not detected
 	if !finalProgress.IsComplete() {
 		uc.logger.Warn("Forcing completion state - jobs finished but progress incomplete",
@@ -121,11 +121,11 @@ func (uc *CloneRepositoriesUseCase) Execute(
 			shared.IntField("skipped", finalProgress.Skipped),
 			shared.IntField("total", finalProgress.Total),
 			shared.IntField("in_progress", finalProgress.InProgress))
-		
+
 		// First try to synchronize progress properly
 		progressTracker.ForceSynchronize()
 		finalProgress = progressTracker.GetProgress()
-		
+
 		// If still not complete, force remaining jobs
 		for finalProgress.InProgress > 0 {
 			progressTracker.CompleteJob() // Mark remaining as completed instead of failed
@@ -133,7 +133,7 @@ func (uc *CloneRepositoriesUseCase) Execute(
 			uc.logger.Debug("Forced completion of remaining job",
 				shared.IntField("remaining_in_progress", finalProgress.InProgress))
 		}
-		
+
 		// Update final progress after forced completion
 		finalProgress = progressTracker.GetProgress()
 		uc.logger.Info("Final progress after forced completion",

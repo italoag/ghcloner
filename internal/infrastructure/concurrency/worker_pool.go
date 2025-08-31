@@ -16,16 +16,16 @@ import (
 
 // WorkerPool manages concurrent cloning operations using ants
 type WorkerPool struct {
-	pool         *ants.Pool
-	gitClient    *git.GitClient
-	logger       shared.Logger
+	pool            *ants.Pool
+	gitClient       *git.GitClient
+	logger          shared.Logger
 	progressTracker *cloning.ProgressTracker
-	results      chan *cloning.JobResult
-	wg           sync.WaitGroup
-	ctx          context.Context
-	cancel       context.CancelFunc
-	maxRetries   int
-	retryDelay   time.Duration
+	results         chan *cloning.JobResult
+	wg              sync.WaitGroup
+	ctx             context.Context
+	cancel          context.CancelFunc
+	maxRetries      int
+	retryDelay      time.Duration
 }
 
 // WorkerPoolConfig holds configuration for the worker pool
@@ -57,7 +57,7 @@ func NewWorkerPool(config *WorkerPoolConfig) (*WorkerPool, error) {
 	// Create ants pool with panic handler
 	pool, err := ants.NewPool(config.MaxWorkers, ants.WithOptions(ants.Options{
 		ExpiryDuration: 10 * time.Second, // Worker expiry time
-		PreAlloc:       true,              // Pre-allocate workers
+		PreAlloc:       true,             // Pre-allocate workers
 		PanicHandler: func(i interface{}) {
 			config.Logger.Error("Worker panic",
 				shared.StringField("panic", fmt.Sprintf("%v", i)))
@@ -114,7 +114,7 @@ func (wp *WorkerPool) SubmitJobs(jobs []*cloning.CloneJob) error {
 // executeJob executes a single cloning job with retry logic
 func (wp *WorkerPool) executeJob(job *cloning.CloneJob) {
 	startTime := time.Now()
-	
+
 	// Mark job as started
 	job.MarkStarted()
 	if wp.progressTracker != nil {
@@ -137,7 +137,7 @@ func (wp *WorkerPool) executeJob(job *cloning.CloneJob) {
 
 		// Execute the clone operation
 		err := wp.gitClient.CloneRepository(wp.ctx, job)
-		
+
 		if err == nil {
 			// Success
 			wp.handleJobSuccess(job, startTime)
@@ -190,7 +190,7 @@ func (wp *WorkerPool) executeJob(job *cloning.CloneJob) {
 func (wp *WorkerPool) handleJobSuccess(job *cloning.CloneJob, startTime time.Time) {
 	duration := time.Since(startTime)
 	job.MarkCompleted()
-	
+
 	// Calculate repository size
 	var repoSize int64
 	if size, err := wp.gitClient.GetRepositorySize(job.GetDestinationPath()); err == nil {
@@ -207,7 +207,7 @@ func (wp *WorkerPool) handleJobSuccess(job *cloning.CloneJob, startTime time.Tim
 	}
 
 	result := cloning.NewJobResult(job, true, repoSize)
-	
+
 	wp.logger.Info("Clone job completed successfully",
 		shared.StringField("job_id", job.ID),
 		shared.StringField("repo", job.Repository.GetFullName()),
@@ -224,7 +224,7 @@ func (wp *WorkerPool) handleJobSuccess(job *cloning.CloneJob, startTime time.Tim
 func (wp *WorkerPool) handleJobFailure(job *cloning.CloneJob, err error) {
 	duration := job.Duration()
 	job.MarkFailed(err)
-	
+
 	// Update progress with detailed information
 	if wp.progressTracker != nil {
 		wp.progressTracker.FailJobWithDetails(
@@ -235,7 +235,7 @@ func (wp *WorkerPool) handleJobFailure(job *cloning.CloneJob, err error) {
 	}
 
 	result := cloning.NewJobResult(job, false, 0)
-	
+
 	wp.logger.Error("Clone job failed permanently",
 		shared.StringField("job_id", job.ID),
 		shared.StringField("repo", job.Repository.GetFullName()),
@@ -251,7 +251,7 @@ func (wp *WorkerPool) handleJobFailure(job *cloning.CloneJob, err error) {
 func (wp *WorkerPool) handleJobSkipped(job *cloning.CloneJob, reason string) {
 	duration := job.Duration()
 	job.MarkSkipped(reason)
-	
+
 	// Update progress with detailed information
 	if wp.progressTracker != nil {
 		wp.progressTracker.SkipJobWithDetails(
@@ -262,7 +262,7 @@ func (wp *WorkerPool) handleJobSkipped(job *cloning.CloneJob, reason string) {
 	}
 
 	result := cloning.NewJobResult(job, true, 0) // Consider skipped as success
-	
+
 	wp.logger.Info("Clone job skipped",
 		shared.StringField("job_id", job.ID),
 		shared.StringField("repo", job.Repository.GetFullName()),
@@ -277,7 +277,7 @@ func (wp *WorkerPool) handleJobSkipped(job *cloning.CloneJob, reason string) {
 // handleJobCancellation handles job cancellation
 func (wp *WorkerPool) handleJobCancellation(job *cloning.CloneJob) {
 	job.MarkFailed(fmt.Errorf("job cancelled"))
-	
+
 	if wp.progressTracker != nil {
 		wp.progressTracker.FailJob()
 	}
@@ -324,10 +324,10 @@ func (wp *WorkerPool) GetStats() *WorkerPoolStats {
 // Close gracefully shuts down the worker pool
 func (wp *WorkerPool) Close() error {
 	wp.logger.Info("Shutting down worker pool")
-	
+
 	// Cancel context to stop new work
 	wp.cancel()
-	
+
 	// Wait for current jobs to complete with timeout
 	done := make(chan struct{})
 	go func() {
@@ -344,7 +344,7 @@ func (wp *WorkerPool) Close() error {
 
 	// Close the ants pool
 	wp.pool.Release()
-	
+
 	return nil
 }
 
@@ -384,7 +384,7 @@ type JobManager struct {
 // NewJobManager creates a new job manager
 func NewJobManager(workerPool *WorkerPool, logger shared.Logger) *JobManager {
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	jm := &JobManager{
 		highPriorityJobs: make(chan *cloning.CloneJob, 100),
 		normalJobs:       make(chan *cloning.CloneJob, 1000),

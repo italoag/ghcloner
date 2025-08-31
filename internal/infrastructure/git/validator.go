@@ -228,7 +228,7 @@ func (v *GitValidator) ValidateCloneOptions(options *cloning.CloneOptions) error
 func (v *GitValidator) validatePathCharacters(path string) error {
 	// Characters that are generally invalid in file paths
 	invalidChars := []string{"<", ">", ":", "\"", "|", "?", "*"}
-	
+
 	for _, char := range invalidChars {
 		if strings.Contains(path, char) {
 			return fmt.Errorf("path contains invalid character '%s': %s", char, path)
@@ -275,8 +275,12 @@ func (v *GitValidator) validateParentDirectory(parentDir string) error {
 	if err != nil {
 		return fmt.Errorf("parent directory is not writable: %w", err)
 	}
-	file.Close()
-	os.Remove(tempFile)
+	if err := file.Close(); err != nil {
+		v.logger.Warn("failed to close temporary file", shared.ErrorField(err))
+	}
+	if err := os.Remove(tempFile); err != nil {
+		v.logger.Warn("failed to remove temporary file", shared.ErrorField(err))
+	}
 
 	return nil
 }
@@ -298,16 +302,16 @@ func (v *GitValidator) validateBranchName(branch string) error {
 
 	// Git branch name rules
 	invalidPatterns := []string{
-		`^\.`,           // Cannot start with dot
-		`\.\.$`,         // Cannot end with ..
-		`@\{`,           // Cannot contain @{
-		`\\$`,           // Cannot end with backslash
-		`^/`,            // Cannot start with /
-		`/$`,            // Cannot end with /
-		`//`,            // Cannot contain consecutive /
+		`^\.`,             // Cannot start with dot
+		`\.\.$`,           // Cannot end with ..
+		`@\{`,             // Cannot contain @{
+		`\\$`,             // Cannot end with backslash
+		`^/`,              // Cannot start with /
+		`/$`,              // Cannot end with /
+		`//`,              // Cannot contain consecutive /
 		`[\x00-\x1f\x7f]`, // Cannot contain control characters
-		`[ ]$`,          // Cannot end with space
-		`^[ ]`,          // Cannot start with space
+		`[ ]$`,            // Cannot end with space
+		`^[ ]`,            // Cannot start with space
 	}
 
 	for _, pattern := range invalidPatterns {
@@ -334,7 +338,7 @@ func (v *GitValidator) validateBranchName(branch string) error {
 // ValidateGitRepository checks if a directory contains a valid Git repository
 func (v *GitValidator) ValidateGitRepository(path string) error {
 	gitDir := filepath.Join(path, ".git")
-	
+
 	stat, err := os.Stat(gitDir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -364,26 +368,25 @@ func (v *GitValidator) ValidateGitRepository(path string) error {
 
 // IsRetryableError determines if a Git error is retryable
 func (v *GitValidator) IsRetryableError(err error) bool {
-	switch err.(type) {
+	switch e := err.(type) {
 	case *NetworkError, *TimeoutError:
 		return true
 	case *GitError:
 		// Some git errors might be retryable
-		gitErr := err.(*GitError)
 		retryableMessages := []string{
 			"connection reset",
 			"temporary failure",
 			"service unavailable",
 			"try again",
 		}
-		
+
 		for _, msg := range retryableMessages {
-			if strings.Contains(strings.ToLower(gitErr.Output), msg) {
+			if strings.Contains(strings.ToLower(e.Output), msg) {
 				return true
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -393,6 +396,6 @@ func (v *GitValidator) IsPermanentError(err error) bool {
 	case *AuthenticationError, *RepositoryNotFoundError, *PermissionError, *DiskSpaceError, *PathTooLongError:
 		return true
 	}
-	
+
 	return false
 }

@@ -18,17 +18,17 @@ type RecentCompletion struct {
 
 // Progress represents the current state of cloning operations
 type Progress struct {
-	Total            int                 `json:"total"`
-	Completed        int                 `json:"completed"`
-	Failed           int                 `json:"failed"`
-	Skipped          int                 `json:"skipped"`
-	InProgress       int                 `json:"in_progress"`
-	ElapsedTime      time.Duration       `json:"elapsed_time"`
-	ETA              time.Duration       `json:"eta"`
-	StartTime        time.Time           `json:"start_time"`
-	Throughput       float64             `json:"throughput"` // Jobs per second
-	RecentCompletion *RecentCompletion   `json:"recent_completion,omitempty"`
-	LastUpdate       time.Time           `json:"last_update"`
+	Total            int               `json:"total"`
+	Completed        int               `json:"completed"`
+	Failed           int               `json:"failed"`
+	Skipped          int               `json:"skipped"`
+	InProgress       int               `json:"in_progress"`
+	ElapsedTime      time.Duration     `json:"elapsed_time"`
+	ETA              time.Duration     `json:"eta"`
+	StartTime        time.Time         `json:"start_time"`
+	Throughput       float64           `json:"throughput"` // Jobs per second
+	RecentCompletion *RecentCompletion `json:"recent_completion,omitempty"`
+	LastUpdate       time.Time         `json:"last_update"`
 }
 
 // NewProgress creates a new progress tracker
@@ -46,7 +46,7 @@ func (p *Progress) UpdateRecentCompletion(repo string, status JobStatus, duratio
 	if err != nil {
 		errorStr = err.Error()
 	}
-	
+
 	p.RecentCompletion = &RecentCompletion{
 		Repository:  repo,
 		Status:      status,
@@ -66,12 +66,12 @@ func (p *Progress) GetPercentage() float64 {
 	processed := float64(p.Completed + p.Failed + p.Skipped)
 	total := float64(p.Total)
 	percentage := (processed / total) * 100.0
-	
+
 	// Ensure we don't exceed 100% due to floating point precision
 	if percentage > 100.0 {
 		percentage = 100.0
 	}
-	
+
 	return percentage
 }
 
@@ -106,7 +106,7 @@ func (p *Progress) CalculateETA() {
 
 	p.UpdateElapsedTime()
 	processed := p.Completed + p.Failed + p.Skipped
-	
+
 	if processed == 0 {
 		p.ETA = 0
 		return
@@ -114,7 +114,7 @@ func (p *Progress) CalculateETA() {
 
 	// Calculate throughput
 	p.Throughput = float64(processed) / p.ElapsedTime.Seconds()
-	
+
 	if p.Throughput > 0 {
 		remaining := p.Total - processed - p.InProgress
 		p.ETA = time.Duration(float64(remaining)/p.Throughput) * time.Second
@@ -147,7 +147,7 @@ func NewProgressTracker(total int) *ProgressTracker {
 func (pt *ProgressTracker) GetProgress() *Progress {
 	pt.mutex.RLock()
 	defer pt.mutex.RUnlock()
-	
+
 	// Create a copy to avoid race conditions
 	progressCopy := *pt.progress
 	progressCopy.CalculateETA()
@@ -158,7 +158,7 @@ func (pt *ProgressTracker) GetProgress() *Progress {
 func (pt *ProgressTracker) StartJob() {
 	pt.mutex.Lock()
 	defer pt.mutex.Unlock()
-	
+
 	pt.progress.InProgress++
 	pt.notifyUpdate()
 }
@@ -167,7 +167,7 @@ func (pt *ProgressTracker) StartJob() {
 func (pt *ProgressTracker) CompleteJob() {
 	pt.mutex.Lock()
 	defer pt.mutex.Unlock()
-	
+
 	// Ensure we don't go negative
 	if pt.progress.InProgress > 0 {
 		pt.progress.InProgress--
@@ -180,7 +180,7 @@ func (pt *ProgressTracker) CompleteJob() {
 func (pt *ProgressTracker) CompleteJobWithDetails(repo string, duration time.Duration, size int64) {
 	pt.mutex.Lock()
 	defer pt.mutex.Unlock()
-	
+
 	// Ensure we don't go negative
 	if pt.progress.InProgress > 0 {
 		pt.progress.InProgress--
@@ -194,7 +194,7 @@ func (pt *ProgressTracker) CompleteJobWithDetails(repo string, duration time.Dur
 func (pt *ProgressTracker) FailJob() {
 	pt.mutex.Lock()
 	defer pt.mutex.Unlock()
-	
+
 	// Ensure we don't go negative
 	if pt.progress.InProgress > 0 {
 		pt.progress.InProgress--
@@ -207,7 +207,7 @@ func (pt *ProgressTracker) FailJob() {
 func (pt *ProgressTracker) FailJobWithDetails(repo string, duration time.Duration, err error) {
 	pt.mutex.Lock()
 	defer pt.mutex.Unlock()
-	
+
 	// Ensure we don't go negative
 	if pt.progress.InProgress > 0 {
 		pt.progress.InProgress--
@@ -221,7 +221,7 @@ func (pt *ProgressTracker) FailJobWithDetails(repo string, duration time.Duratio
 func (pt *ProgressTracker) SkipJob() {
 	pt.mutex.Lock()
 	defer pt.mutex.Unlock()
-	
+
 	// Ensure we don't go negative
 	if pt.progress.InProgress > 0 {
 		pt.progress.InProgress--
@@ -234,7 +234,7 @@ func (pt *ProgressTracker) SkipJob() {
 func (pt *ProgressTracker) SkipJobWithDetails(repo string, duration time.Duration, reason string) {
 	pt.mutex.Lock()
 	defer pt.mutex.Unlock()
-	
+
 	// Ensure we don't go negative
 	if pt.progress.InProgress > 0 {
 		pt.progress.InProgress--
@@ -254,9 +254,9 @@ func (pt *ProgressTracker) Subscribe() <-chan *Progress {
 func (pt *ProgressTracker) ForceSynchronize() {
 	pt.mutex.Lock()
 	defer pt.mutex.Unlock()
-	
+
 	processed := pt.progress.Completed + pt.progress.Failed + pt.progress.Skipped
-	
+
 	// If we have InProgress jobs but all jobs should be done, convert them to completed
 	if processed < pt.progress.Total && pt.progress.InProgress > 0 {
 		// Move remaining InProgress to Completed to reach total
@@ -270,12 +270,12 @@ func (pt *ProgressTracker) ForceSynchronize() {
 			pt.progress.InProgress = 0
 		}
 	}
-	
+
 	// Ensure InProgress is never negative
 	if pt.progress.InProgress < 0 {
 		pt.progress.InProgress = 0
 	}
-	
+
 	pt.notifyUpdate()
 }
 
@@ -289,10 +289,10 @@ func (pt *ProgressTracker) Close() {
 func (pt *ProgressTracker) notifyUpdate() {
 	progressCopy := *pt.progress
 	progressCopy.CalculateETA()
-	
+
 	// Validate progress consistency
 	pt.validateProgressConsistency(&progressCopy)
-	
+
 	select {
 	case pt.updates <- &progressCopy:
 	case <-pt.done:
@@ -305,7 +305,7 @@ func (pt *ProgressTracker) notifyUpdate() {
 func (pt *ProgressTracker) validateProgressConsistency(progress *Progress) {
 	processed := progress.Completed + progress.Failed + progress.Skipped
 	totalActive := processed + progress.InProgress
-	
+
 	// If we've processed more than total, something is wrong
 	if processed > progress.Total {
 		// Force InProgress to 0 and adjust total if needed
@@ -314,7 +314,7 @@ func (pt *ProgressTracker) validateProgressConsistency(progress *Progress) {
 			progress.Total = processed
 		}
 	}
-	
+
 	// If total active exceeds total, reduce InProgress
 	if totalActive > progress.Total {
 		progress.InProgress = progress.Total - processed
@@ -341,7 +341,7 @@ func NewBatchProgress() *BatchProgress {
 func (bp *BatchProgress) AddBatch(batchID string, total int) *ProgressTracker {
 	bp.mutex.Lock()
 	defer bp.mutex.Unlock()
-	
+
 	tracker := NewProgressTracker(total)
 	bp.batches[batchID] = tracker
 	return tracker
@@ -351,7 +351,7 @@ func (bp *BatchProgress) AddBatch(batchID string, total int) *ProgressTracker {
 func (bp *BatchProgress) GetBatch(batchID string) *ProgressTracker {
 	bp.mutex.RLock()
 	defer bp.mutex.RUnlock()
-	
+
 	return bp.batches[batchID]
 }
 
@@ -359,15 +359,15 @@ func (bp *BatchProgress) GetBatch(batchID string) *ProgressTracker {
 func (bp *BatchProgress) GetOverallProgress() *Progress {
 	bp.mutex.RLock()
 	defer bp.mutex.RUnlock()
-	
+
 	if len(bp.batches) == 0 {
 		return NewProgress(0)
 	}
-	
+
 	overall := &Progress{
 		StartTime: time.Now(), // Will be updated to earliest start time
 	}
-	
+
 	for _, tracker := range bp.batches {
 		progress := tracker.GetProgress()
 		overall.Total += progress.Total
@@ -375,16 +375,16 @@ func (bp *BatchProgress) GetOverallProgress() *Progress {
 		overall.Failed += progress.Failed
 		overall.Skipped += progress.Skipped
 		overall.InProgress += progress.InProgress
-		
+
 		// Use earliest start time
 		if overall.StartTime.After(progress.StartTime) {
 			overall.StartTime = progress.StartTime
 		}
 	}
-	
+
 	overall.UpdateElapsedTime()
 	overall.CalculateETA()
-	
+
 	return overall
 }
 
@@ -392,7 +392,7 @@ func (bp *BatchProgress) GetOverallProgress() *Progress {
 func (bp *BatchProgress) RemoveBatch(batchID string) {
 	bp.mutex.Lock()
 	defer bp.mutex.Unlock()
-	
+
 	if tracker, exists := bp.batches[batchID]; exists {
 		tracker.Close()
 		delete(bp.batches, batchID)
@@ -403,7 +403,7 @@ func (bp *BatchProgress) RemoveBatch(batchID string) {
 func (bp *BatchProgress) Close() {
 	bp.mutex.Lock()
 	defer bp.mutex.Unlock()
-	
+
 	for _, tracker := range bp.batches {
 		tracker.Close()
 	}

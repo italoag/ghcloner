@@ -15,17 +15,17 @@ import (
 
 // GitHubAPIResponse represents the structure of GitHub API responses
 type GitHubAPIResponse struct {
-	ID              int64     `json:"id"`
-	Name            string    `json:"name"`
-	FullName        string    `json:"full_name"`
-	CloneURL        string    `json:"clone_url"`
-	Fork            bool      `json:"fork"`
-	Size            int64     `json:"size"`
-	DefaultBranch   string    `json:"default_branch"`
-	Language        string    `json:"language"`
-	Description     string    `json:"description"`
-	UpdatedAt       time.Time `json:"updated_at"`
-	Owner           OwnerInfo `json:"owner"`
+	ID            int64     `json:"id"`
+	Name          string    `json:"name"`
+	FullName      string    `json:"full_name"`
+	CloneURL      string    `json:"clone_url"`
+	Fork          bool      `json:"fork"`
+	Size          int64     `json:"size"`
+	DefaultBranch string    `json:"default_branch"`
+	Language      string    `json:"language"`
+	Description   string    `json:"description"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	Owner         OwnerInfo `json:"owner"`
 }
 
 // OwnerInfo represents repository owner information
@@ -146,7 +146,7 @@ func (c *GitHubClient) fetchRepositoryPage(
 		}
 	}
 
-	url := fmt.Sprintf("%s/%s/%s/repos?per_page=%d&page=%d", 
+	url := fmt.Sprintf("%s/%s/%s/repos?per_page=%d&page=%d",
 		c.baseURL, repoType.String(), owner, perPage, page)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -157,7 +157,7 @@ func (c *GitHubClient) fetchRepositoryPage(
 	// Set headers
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", c.userAgent)
-	
+
 	if c.token != "" {
 		req.Header.Set("Authorization", "token "+c.token)
 	}
@@ -166,7 +166,11 @@ func (c *GitHubClient) fetchRepositoryPage(
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to execute request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			c.logger.Warn("failed to close response body", shared.ErrorField(err))
+		}
+	}()
 
 	// Update rate limiter with response headers
 	if c.rateLimiter != nil {
@@ -255,7 +259,7 @@ func (c *GitHubClient) GetRateLimitInfo(ctx context.Context) (*RateLimitInfo, er
 
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", c.userAgent)
-	
+
 	if c.token != "" {
 		req.Header.Set("Authorization", "token "+c.token)
 	}
@@ -264,7 +268,11 @@ func (c *GitHubClient) GetRateLimitInfo(ctx context.Context) (*RateLimitInfo, er
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			c.logger.Warn("failed to close response body", shared.ErrorField(err))
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to get rate limit info: status %d", resp.StatusCode)
@@ -309,7 +317,11 @@ func (c *GitHubClient) ValidateToken(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to execute request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			c.logger.Warn("failed to close response body", shared.ErrorField(err))
+		}
+	}()
 
 	if resp.StatusCode == http.StatusUnauthorized {
 		return fmt.Errorf("invalid token")

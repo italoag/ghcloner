@@ -18,12 +18,12 @@ import (
 
 // Integration test configuration
 type TestConfig struct {
-	GitHubToken    string
-	TestOwner      string
-	TestRepoType   repository.RepositoryType
-	MaxWorkers     int
-	TestTimeout    time.Duration
-	SkipGitTests   bool
+	GitHubToken     string
+	TestOwner       string
+	TestRepoType    repository.RepositoryType
+	MaxWorkers      int
+	TestTimeout     time.Duration
+	SkipGitTests    bool
 	SkipGitHubTests bool
 }
 
@@ -35,7 +35,7 @@ func getTestConfig() *TestConfig {
 		MaxWorkers:      2,
 		TestTimeout:     30 * time.Second,
 		SkipGitTests:    false,
-		SkipGitHubTests: true, // Skip by default to avoid rate limiting
+		SkipGitHubTests: false, // Skip by default to avoid rate limiting
 	}
 }
 
@@ -62,7 +62,7 @@ func TestGitHubClient_Integration(t *testing.T) {
 	filter.IncludeForks = false
 
 	repos, err := client.FetchRepositories(ctx, config.TestOwner, config.TestRepoType, filter, nil)
-	
+
 	if config.GitHubToken == "" {
 		// Without token, we might get rate limited, but shouldn't crash
 		if err != nil {
@@ -121,7 +121,9 @@ func TestWorkerPool_Integration(t *testing.T) {
 		Logger:     logger,
 	})
 	require.NoError(t, err)
-	defer workerPool.Close()
+	defer func() {
+		require.NoError(t, workerPool.Close())
+	}()
 
 	// Test worker pool stats
 	stats := workerPool.GetStats()
@@ -137,7 +139,9 @@ func TestProgressService_Integration(t *testing.T) {
 		Logger:         logger,
 		UpdateInterval: 100 * time.Millisecond,
 	})
-	defer progressService.Close()
+	defer func() {
+		require.NoError(t, progressService.Close())
+	}()
 
 	batchID := "test-batch"
 	totalJobs := 5

@@ -2,7 +2,6 @@ package views
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
@@ -313,100 +312,4 @@ func (v *AppView) renderFinalStats(progress *cloning.Progress, elapsed time.Dura
 	return statsStyle.Render(stats)
 }
 
-// Helper functions for better UX
 
-// formatDuration formats a duration for display
-func formatDuration(d time.Duration) string {
-	if d < time.Second {
-		return "< 1s"
-	}
-
-	if d < time.Minute {
-		return fmt.Sprintf("%ds", int(d.Seconds()))
-	}
-
-	if d < time.Hour {
-		minutes := int(d.Minutes())
-		seconds := int(d.Seconds()) % 60
-		return fmt.Sprintf("%dm %ds", minutes, seconds)
-	}
-
-	hours := int(d.Hours())
-	minutes := int(d.Minutes()) % 60
-	return fmt.Sprintf("%dh %dm", hours, minutes)
-}
-
-// formatSize formats bytes to human readable format
-func formatSize(bytes int64) string {
-	const unit = 1024
-	if bytes < unit {
-		return fmt.Sprintf("%d B", bytes)
-	}
-
-	div, exp := int64(unit), 0
-	for n := bytes / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-
-	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
-}
-
-// getProgressEmoji returns an emoji based on progress percentage
-func getProgressEmoji(percentage float64) string {
-	switch {
-	case percentage >= 100:
-		return "🎉"
-	case percentage >= 75:
-		return "🔥"
-	case percentage >= 50:
-		return "⚡"
-	case percentage >= 25:
-		return "🚀"
-	default:
-		return "⏳"
-	}
-}
-
-// getStatusColor returns a color based on job status
-func getStatusColor(completed, failed, total int) lipgloss.Color {
-	if total == 0 {
-		return lipgloss.Color("#626262")
-	}
-
-	successRate := float64(completed) / float64(completed+failed) * 100
-
-	switch {
-	case successRate >= 95:
-		return lipgloss.Color("#04B575") // Green
-	case successRate >= 80:
-		return lipgloss.Color("#FFAF00") // Yellow
-	default:
-		return lipgloss.Color("#FF5F87") // Red
-	}
-}
-
-// Enhanced progress visualization
-func (v *AppView) renderEnhancedProgress(progress *cloning.Progress) string {
-	if progress == nil {
-		return infoStyle.Render("Initializing...")
-	}
-
-	emoji := getProgressEmoji(progress.GetPercentage())
-	percentage := progress.GetPercentage()
-
-	// Create a visual progress bar
-	barWidth := 40
-	filledWidth := int(percentage / 100 * float64(barWidth))
-	emptyWidth := barWidth - filledWidth
-
-	bar := strings.Repeat("█", filledWidth) + strings.Repeat("░", emptyWidth)
-
-	progressText := fmt.Sprintf("%s [%s] %.1f%%", emoji, bar, percentage)
-
-	// Color the bar based on status
-	color := getStatusColor(progress.Completed, progress.Failed, progress.Total)
-	styledBar := lipgloss.NewStyle().Foreground(color).Render(progressText)
-
-	return progressStyle.Render(styledBar)
-}

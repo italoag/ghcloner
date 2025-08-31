@@ -326,7 +326,7 @@ func displayCSV(repos []*repository.Repository) error {
 	for _, repo := range repos {
 		// Escape quotes in description
 		description := strings.ReplaceAll(repo.Description, `"`, `""`)
-		
+
 		fmt.Printf(`"%s","%s","%s",%d,"%s",%t,"%s","%s","%s"`+"\n",
 			repo.Name,
 			repo.GetFullName(),

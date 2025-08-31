@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/italoag/ghcloner/internal/domain/repository"
+	"github.com/italoag/ghcloner/internal/domain/shared"
 )
 
 // Cloning domain errors
@@ -20,11 +21,13 @@ var (
 )
 
 // DomainCloneService implements core cloning business logic
-type DomainCloneService struct{}
+type DomainCloneService struct{
+	logger shared.Logger
+}
 
 // NewDomainCloneService creates a new domain clone service
-func NewDomainCloneService() *DomainCloneService {
-	return &DomainCloneService{}
+func NewDomainCloneService(logger shared.Logger) *DomainCloneService {
+	return &DomainCloneService{logger: logger}
 }
 
 // ValidateJob validates a clone job before execution
@@ -87,8 +90,12 @@ func (s *DomainCloneService) ValidateDestination(path string) error {
 	if file, err := os.Create(tempFile); err != nil {
 		return fmt.Errorf("%w: %v", ErrDestinationNotWritable, err)
 	} else {
-		file.Close()
-		os.Remove(tempFile)
+		if err := file.Close(); err != nil {
+			s.logger.Warn("failed to close temporary file", shared.ErrorField(err))
+		}
+		if err := os.Remove(tempFile); err != nil {
+			s.logger.Warn("failed to remove temporary file", shared.ErrorField(err))
+		}
 	}
 
 	return nil

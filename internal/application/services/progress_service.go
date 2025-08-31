@@ -12,14 +12,14 @@ import (
 
 // ProgressService manages progress tracking for cloning operations
 type ProgressService struct {
-	batches         map[string]*cloning.ProgressTracker
-	subscribers     map[string][]chan *cloning.Progress
-	logger          shared.Logger
-	mu              sync.RWMutex
-	updateInterval  time.Duration
-	ctx             context.Context
-	cancel          context.CancelFunc
-	wg              sync.WaitGroup
+	batches        map[string]*cloning.ProgressTracker
+	subscribers    map[string][]chan *cloning.Progress
+	logger         shared.Logger
+	mu             sync.RWMutex
+	updateInterval time.Duration
+	ctx            context.Context
+	cancel         context.CancelFunc
+	wg             sync.WaitGroup
 }
 
 // ProgressServiceConfig holds configuration for progress service
@@ -323,7 +323,7 @@ func (ps *ProgressService) GetServiceStats() *ServiceStats {
 		CompletedBatches: completedBatches,
 		ActiveBatches:    totalBatches - completedBatches,
 		TotalSubscribers: totalSubscribers,
-		Uptime:          time.Since(ps.getStartTime()),
+		Uptime:           time.Since(ps.getStartTime()),
 	}
 }
 
@@ -343,7 +343,7 @@ func (ps *ProgressService) Close() error {
 	// Close all trackers and subscriber channels
 	for batchID, tracker := range ps.batches {
 		tracker.Close()
-		
+
 		for _, ch := range ps.subscribers[batchID] {
 			close(ch)
 		}
@@ -394,7 +394,7 @@ func (ps *ProgressService) sendUpdates() {
 				ps.logger.Warn("Removing unresponsive subscriber",
 					shared.StringField("batch_id", batchID),
 					shared.IntField("subscriber_index", i))
-				
+
 				// Remove this subscriber (this is safe because we have read lock)
 				// The actual removal will happen in a separate cleanup routine
 			}
@@ -405,24 +405,24 @@ func (ps *ProgressService) sendUpdates() {
 // getStartTime returns the earliest start time across all batches
 func (ps *ProgressService) getStartTime() time.Time {
 	earliest := time.Now()
-	
+
 	for _, tracker := range ps.batches {
 		progress := tracker.GetProgress()
 		if progress.StartTime.Before(earliest) {
 			earliest = progress.StartTime
 		}
 	}
-	
+
 	return earliest
 }
 
 // BatchStats represents statistics for a progress batch
 type BatchStats struct {
-	BatchID         string             `json:"batch_id"`
-	Progress        *cloning.Progress  `json:"progress"`
-	SubscriberCount int                `json:"subscriber_count"`
-	IsComplete      bool               `json:"is_complete"`
-	CreatedAt       time.Time          `json:"created_at"`
+	BatchID         string            `json:"batch_id"`
+	Progress        *cloning.Progress `json:"progress"`
+	SubscriberCount int               `json:"subscriber_count"`
+	IsComplete      bool              `json:"is_complete"`
+	CreatedAt       time.Time         `json:"created_at"`
 }
 
 // ServiceStats represents overall service statistics

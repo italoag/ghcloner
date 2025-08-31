@@ -84,7 +84,7 @@ func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := gitClient.ValidateGitInstallation(ctx); err != nil {
-		return nil, nil, fmt.Errorf("Git validation failed: %w", err)
+		return nil, nil, fmt.Errorf("git validation failed: %w", err)
 	}
 
 	// Initialize worker pool
@@ -105,7 +105,7 @@ func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 	}
 
 	// Initialize domain service
-	domainService := cloning.NewDomainCloneService()
+	domainService := cloning.NewDomainCloneService(logger.With(shared.StringField("component", "domain_service")))
 
 	// Initialize use cases
 	fetchRepositoriesUseCase := usecases.NewFetchRepositoriesUseCase(

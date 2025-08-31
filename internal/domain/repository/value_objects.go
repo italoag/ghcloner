@@ -22,12 +22,12 @@ func (rt RepositoryType) String() string {
 
 // RepositoryFilter represents filtering options for repositories
 type RepositoryFilter struct {
-	IncludeForks  bool
-	MinSize       int64
-	MaxSize       int64
-	Languages     []string
-	UpdatedAfter  time.Time
-	OnlyPublic    bool
+	IncludeForks bool
+	MinSize      int64
+	MaxSize      int64
+	Languages    []string
+	UpdatedAfter time.Time
+	OnlyPublic   bool
 }
 
 // NewRepositoryFilter creates a new repository filter with defaults
