@@ -119,7 +119,7 @@ jobs:
         cache: true
 
     - name: Run Gosec Security Scanner
-      uses: securecodewarrior/github-action-gosec@master
+      uses: securego/gosec-action@master
       with:
         args: '-no-fail -fmt sarif -out results.sarif ./...'
 
