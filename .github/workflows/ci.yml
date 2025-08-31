@@ -119,7 +119,7 @@ jobs:
         cache: true
 
     - name: Run Gosec Security Scanner
-      uses: securego/gosec-action@master
+      uses: securego/gosec@master
       with:
         args: '-no-fail -fmt sarif -out results.sarif ./...'
 
