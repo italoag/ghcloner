@@ -311,5 +311,3 @@ func (v *AppView) renderFinalStats(progress *cloning.Progress, elapsed time.Dura
 
 	return statsStyle.Render(stats)
 }
-
-

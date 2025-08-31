@@ -154,18 +154,18 @@ func runCloneCommand(cmd *cobra.Command, args []string, cloneConfig *CloneConfig
 
 // TUI Model for clone command
 type cloneTUIModel struct {
-	app             *Application
-	cloneConfig     *CloneConfig
-	globalConfig    *Config
-	repos           []*repository.Repository
-	total           int
-	progress        progress.Model
-	quitting        bool
-	err             error
-	tuiLogger       *logging.TUILogger
-	logHeight       int
-	showLogs        bool
-	actualProgress  *cloning.Progress // Store actual progress for display
+	app            *Application
+	cloneConfig    *CloneConfig
+	globalConfig   *Config
+	repos          []*repository.Repository
+	total          int
+	progress       progress.Model
+	quitting       bool
+	err            error
+	tuiLogger      *logging.TUILogger
+	logHeight      int
+	showLogs       bool
+	actualProgress *cloning.Progress // Store actual progress for display
 }
 
 func newCloneTUIModel(app *Application, cloneConfig *CloneConfig, globalConfig *Config, tuiLogger *logging.TUILogger) cloneTUIModel {

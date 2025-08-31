@@ -21,7 +21,7 @@ var (
 )
 
 // DomainCloneService implements core cloning business logic
-type DomainCloneService struct{
+type DomainCloneService struct {
 	logger shared.Logger
 }
 
