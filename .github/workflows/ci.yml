@@ -57,6 +57,7 @@ jobs:
       run: go vet ./...
 
     - name: Run go fmt check
+      shell: bash
       run: |
         if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
           echo "Code is not formatted:"
