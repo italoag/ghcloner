@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -173,29 +174,26 @@ func TestRepository_GetLocalPath(t *testing.T) {
 	tests := []struct {
 		name    string
 		baseDir string
-		want    string
 	}{
 		{
 			name:    "simple path",
 			baseDir: "/tmp",
-			want:    "/tmp/test-repo",
 		},
 		{
 			name:    "path with trailing slash",
 			baseDir: "/tmp/",
-			want:    "/tmp/test-repo",
 		},
 		{
 			name:    "nested path",
 			baseDir: "/home/user/projects",
-			want:    "/home/user/projects/test-repo",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := repo.GetLocalPath(tt.baseDir)
-			assert.Equal(t, tt.want, got)
+			want := filepath.Join(tt.baseDir, repo.Name)
+			assert.Equal(t, want, got)
 		})
 	}
 }
