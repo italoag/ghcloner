@@ -45,8 +45,7 @@ jobs:
             minor=0
             patch=0
           fi
-          labels=$(jq -r '.pull_request.labels | map(.name) | join(" ")' "$GITHUB_EVENT_PATH")
-          if echo "$labels" | grep -qi "hotfix"; then
+          if jq -e '.pull_request.labels | any(.name | test("hotfix"; "i"))' "$GITHUB_EVENT_PATH" > /dev/null; then
             patch=$((patch+1))
           else
             minor=$((minor+1))
