@@ -45,6 +45,11 @@ RUN ./ghclone --help
 # Runtime stage
 FROM alpine:${ALPINE_VERSION}
 
+# Re-declare build arguments for use in this stage
+ARG VERSION=dev
+ARG GIT_REV=unknown
+ARG BUILD_DATE=unknown
+
 # Install runtime dependencies
 RUN apk add --no-cache \
     git \
@@ -75,7 +80,10 @@ USER ghclone
 # Set environment variables
 ENV PATH="/app:${PATH}" \
     HOME="/home/ghclone" \
-    USER="ghclone"
+    USER="ghclone" \
+    VERSION="${VERSION}" \
+    GIT_REV="${GIT_REV}" \
+    BUILD_DATE="${BUILD_DATE}"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

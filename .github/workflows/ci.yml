@@ -59,9 +59,10 @@ jobs:
     - name: Run go fmt check
       shell: bash
       run: |
-        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+        fmt_output=$(gofmt -s -l $(git ls-files '*.go'))
+        if [ -n "$fmt_output" ]; then
           echo "Code is not formatted:"
-          gofmt -s -l .
+          echo "$fmt_output"
           exit 1
         fi
 
@@ -74,6 +75,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Generate coverage report
+      if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.24.x'
+      shell: bash
       run: go tool cover -html=coverage.out -o coverage.html
 
     - name: Upload coverage to Codecov

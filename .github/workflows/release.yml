@@ -11,6 +11,10 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   GO_VERSION: '1.24.x'
 
@@ -229,6 +233,10 @@ jobs:
           type=semver,pattern={{major}}
           type=raw,value=latest,enable={{is_default_branch}}
 
+    - name: Set build variables
+      id: vars
+      run: echo "build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
@@ -240,7 +248,7 @@ jobs:
         build-args: |
           VERSION=${{ needs.create-release.outputs.version }}
           GIT_REV=${{ github.sha }}
-          BUILD_DATE=${{ github.event.head_commit.timestamp }}
+          BUILD_DATE=${{ steps.vars.outputs.build_date }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
