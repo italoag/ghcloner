@@ -1,6 +1,7 @@
 package cloning
 
 import (
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -31,19 +32,16 @@ func TestCloneJob_GetDestinationPath(t *testing.T) {
 		name      string
 		baseDir   string
 		createOrg bool
-		expected  string
 	}{
 		{
 			name:      "simple path",
 			baseDir:   "/tmp",
 			createOrg: false,
-			expected:  "/tmp/test-repo",
 		},
 		{
 			name:      "org directory structure",
 			baseDir:   "/tmp",
 			createOrg: true,
-			expected:  "/tmp/test-owner/test-repo",
 		},
 	}
 
@@ -53,7 +51,11 @@ func TestCloneJob_GetDestinationPath(t *testing.T) {
 			options.CreateOrgDirs = tt.createOrg
 
 			job := NewCloneJob(repo, tt.baseDir, options)
-			assert.Equal(t, tt.expected, job.GetDestinationPath())
+			expected := filepath.Join(tt.baseDir, repo.Name)
+			if tt.createOrg {
+				expected = filepath.Join(tt.baseDir, repo.Owner, repo.Name)
+			}
+			assert.Equal(t, expected, job.GetDestinationPath())
 		})
 	}
 }

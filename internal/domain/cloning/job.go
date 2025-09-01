@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/italoag/ghcloner/internal/domain/repository"
@@ -103,7 +104,7 @@ func NewCloneJob(
 // GetDestinationPath returns the full path where the repository will be cloned
 func (cj *CloneJob) GetDestinationPath() string {
 	if cj.Options.CreateOrgDirs {
-		return fmt.Sprintf("%s/%s/%s", cj.BaseDirectory, cj.Repository.Owner, cj.Repository.Name)
+		return filepath.Join(cj.BaseDirectory, cj.Repository.Owner, cj.Repository.Name)
 	}
 	return cj.Repository.GetLocalPath(cj.BaseDirectory)
 }
