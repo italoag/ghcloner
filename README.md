@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project has been completely optimized and refactored from a sequential monolithic application into a highly concurrent, well-architected tool that follows Go conventions, SOLID principles, clean code practices, and Domain-Driven Design (DDD) patterns.
+This project has been completely optimized and refactored from a sequential monolithic application into a highly concurrent, well-architected tool that follows Go conventions, SOLID principles, clean code practices, and Domain-Driven Design (DDD) patterns, this is my Pet project, just for tests and Go Lang learning. Feel free to use and test.
 
 ## 🚀 Key Improvements
 
