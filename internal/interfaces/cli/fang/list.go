@@ -168,7 +168,7 @@ func executeList(config *ListConfig, globalConfig *Config) error {
 	})
 
 	// Initialize use case
-	fetchUseCase := usecases.NewFetchRepositoriesUseCase(githubClient, logger)
+	fetchUseCase := usecases.NewFetchRepositoriesUseCase(githubClient, nil, logger)
 
 	// Prepare filter
 	filter := repository.NewRepositoryFilter()

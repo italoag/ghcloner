@@ -6,6 +6,7 @@ import (
 
 	"github.com/italoag/ghcloner/internal/domain/repository"
 	"github.com/italoag/ghcloner/internal/domain/shared"
+	"github.com/italoag/ghcloner/internal/infrastructure/bitbucket"
 	"github.com/italoag/ghcloner/internal/infrastructure/github"
 )
 
@@ -26,18 +27,21 @@ type FetchRepositoriesResponse struct {
 
 // FetchRepositoriesUseCase handles the business logic for fetching repositories
 type FetchRepositoriesUseCase struct {
-	githubClient *github.GitHubClient
-	logger       shared.Logger
+	githubClient    *github.GitHubClient
+	bitbucketClient *bitbucket.BitbucketClient
+	logger          shared.Logger
 }
 
 // NewFetchRepositoriesUseCase creates a new fetch repositories use case
 func NewFetchRepositoriesUseCase(
 	githubClient *github.GitHubClient,
+	bitbucketClient *bitbucket.BitbucketClient,
 	logger shared.Logger,
 ) *FetchRepositoriesUseCase {
 	return &FetchRepositoriesUseCase{
-		githubClient: githubClient,
-		logger:       logger,
+		githubClient:    githubClient,
+		bitbucketClient: bitbucketClient,
+		logger:          logger,
 	}
 }
 
@@ -65,14 +69,37 @@ func (uc *FetchRepositoriesUseCase) Execute(
 		shared.IntField("page", req.Pagination.Page),
 		shared.IntField("per_page", req.Pagination.PerPage))
 
-	// Fetch repositories from GitHub
-	repositories, err := uc.githubClient.FetchRepositories(
-		ctx,
-		req.Owner,
-		req.Type,
-		req.Filter,
-		req.Pagination,
-	)
+	// Fetch repositories from appropriate provider
+	var repositories []*repository.Repository
+	var err error
+
+	switch {
+	case req.Type.IsGitHubType():
+		if uc.githubClient == nil {
+			return nil, fmt.Errorf("GitHub client not configured")
+		}
+		repositories, err = uc.githubClient.FetchRepositories(
+			ctx,
+			req.Owner,
+			req.Type,
+			req.Filter,
+			req.Pagination,
+		)
+	case req.Type.IsBitbucketType():
+		if uc.bitbucketClient == nil {
+			return nil, fmt.Errorf("Bitbucket client not configured")
+		}
+		repositories, err = uc.bitbucketClient.FetchRepositories(
+			ctx,
+			req.Owner,
+			req.Type,
+			req.Filter,
+			req.Pagination,
+		)
+	default:
+		return nil, fmt.Errorf("unsupported repository type: %s", req.Type)
+	}
+
 	if err != nil {
 		uc.logger.Error("Failed to fetch repositories",
 			shared.StringField("owner", req.Owner),

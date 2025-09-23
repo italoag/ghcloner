@@ -6,13 +6,31 @@ import "time"
 type RepositoryType string
 
 const (
+	// GitHub repository types
 	RepositoryTypeUser         RepositoryType = "users"
 	RepositoryTypeOrganization RepositoryType = "orgs"
+	
+	// Bitbucket repository types
+	RepositoryTypeBitbucketUser      RepositoryType = "bitbucket_users"
+	RepositoryTypeBitbucketWorkspace RepositoryType = "bitbucket_workspaces"
 )
 
 // IsValid checks if the repository type is valid
 func (rt RepositoryType) IsValid() bool {
+	return rt == RepositoryTypeUser || 
+		rt == RepositoryTypeOrganization || 
+		rt == RepositoryTypeBitbucketUser || 
+		rt == RepositoryTypeBitbucketWorkspace
+}
+
+// IsGitHubType checks if the repository type is for GitHub
+func (rt RepositoryType) IsGitHubType() bool {
 	return rt == RepositoryTypeUser || rt == RepositoryTypeOrganization
+}
+
+// IsBitbucketType checks if the repository type is for Bitbucket
+func (rt RepositoryType) IsBitbucketType() bool {
+	return rt == RepositoryTypeBitbucketUser || rt == RepositoryTypeBitbucketWorkspace
 }
 
 // String returns the string representation of repository type

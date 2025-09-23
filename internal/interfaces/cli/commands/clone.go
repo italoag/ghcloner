@@ -318,7 +318,7 @@ func (c *CloneCommand) executeClone(ctx context.Context, config *CloneConfig) er
 	}()
 
 	// Initialize services
-	fetchUseCase := usecases.NewFetchRepositoriesUseCase(githubClient, logger)
+	fetchUseCase := usecases.NewFetchRepositoriesUseCase(githubClient, nil, logger)
 	cloningService, err := services.NewCloningService(&services.CloningServiceConfig{
 		WorkerPool: workerPool,
 		GitClient:  gitClient,
