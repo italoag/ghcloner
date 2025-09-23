@@ -204,8 +204,8 @@ func NewDefaultConfig() *Config {
 func NewRootCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ghclone",
-		Short: "Concurrent GitHub Repository Cloner",
-		Long: `ghclone is a high-performance, concurrent GitHub repository cloner built with Go.
+		Short: "Concurrent GitHub and Bitbucket Repository Cloner",
+		Long: `ghclone is a high-performance, concurrent repository cloner built with Go.
 
 It provides enhanced terminal UI experiences with real-time progress tracking,
 structured logging, and efficient concurrent processing using worker pools.
@@ -214,15 +214,22 @@ Features:
   • Concurrent cloning with configurable worker pools
   • Real-time progress tracking with TUI
   • Structured logging with file output and TUI display
-  • Support for both user and organization repositories
+  • Support for GitHub (users and organizations) and Bitbucket (users and workspaces)
   • Advanced filtering and configuration options
-  • GitHub API rate limiting and token validation`,
+  • GitHub API rate limiting and token validation
+  • Bitbucket API v2.0 support with app password authentication`,
 		Version: "0.2.0",
-		Example: `  # Clone all repositories from a user
+		Example: `  # Clone all repositories from a GitHub user
   ghclone clone user octocat
 
-  # Clone organization repositories with custom settings
+  # Clone GitHub organization repositories with custom settings
   ghclone clone org microsoft --concurrency 8 --skip-forks
+
+  # Clone all repositories from a Bitbucket user
+  ghclone bitbucket user myusername
+
+  # Clone Bitbucket workspace repositories
+  ghclone bitbucket workspace myworkspace --skip-forks
 
   # List repositories in JSON format
   ghclone list user torvalds --format json --include-forks
