@@ -19,7 +19,7 @@ func TestNewBitbucketClient(t *testing.T) {
 		Development: true,
 	})
 	require.NoError(t, err)
-	defer logger.Close()
+	defer func() { _ = logger.Close() }()
 
 	config := &BitbucketClientConfig{
 		Username:    "testuser",
@@ -44,7 +44,7 @@ func TestBitbucketClient_ConvertToDomainRepository(t *testing.T) {
 		Development: true,
 	})
 	require.NoError(t, err)
-	defer logger.Close()
+	defer func() { _ = logger.Close() }()
 
 	client := NewBitbucketClient(&BitbucketClientConfig{
 		Logger: logger,
@@ -86,7 +86,7 @@ func TestBitbucketClient_ConvertForkRepository(t *testing.T) {
 		Development: true,
 	})
 	require.NoError(t, err)
-	defer logger.Close()
+	defer func() { _ = logger.Close() }()
 
 	client := NewBitbucketClient(&BitbucketClientConfig{
 		Logger: logger,
@@ -189,7 +189,7 @@ func TestBitbucketClient_FetchRepositories_Integration(t *testing.T) {
 	// This test would require real Bitbucket credentials
 	username := "your-bitbucket-username"
 	appPassword := "your-app-password"
-	
+
 	if username == "your-bitbucket-username" {
 		t.Skip("Please set real credentials to run integration test")
 	}
@@ -200,7 +200,7 @@ func TestBitbucketClient_FetchRepositories_Integration(t *testing.T) {
 		Development: true,
 	})
 	require.NoError(t, err)
-	defer logger.Close()
+	defer func() { _ = logger.Close() }()
 
 	client := NewBitbucketClient(&BitbucketClientConfig{
 		Username:    username,

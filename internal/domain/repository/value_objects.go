@@ -9,7 +9,7 @@ const (
 	// GitHub repository types
 	RepositoryTypeUser         RepositoryType = "users"
 	RepositoryTypeOrganization RepositoryType = "orgs"
-	
+
 	// Bitbucket repository types
 	RepositoryTypeBitbucketUser      RepositoryType = "bitbucket_users"
 	RepositoryTypeBitbucketWorkspace RepositoryType = "bitbucket_workspaces"
@@ -17,9 +17,9 @@ const (
 
 // IsValid checks if the repository type is valid
 func (rt RepositoryType) IsValid() bool {
-	return rt == RepositoryTypeUser || 
-		rt == RepositoryTypeOrganization || 
-		rt == RepositoryTypeBitbucketUser || 
+	return rt == RepositoryTypeUser ||
+		rt == RepositoryTypeOrganization ||
+		rt == RepositoryTypeBitbucketUser ||
 		rt == RepositoryTypeBitbucketWorkspace
 }
 

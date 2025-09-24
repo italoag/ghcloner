@@ -40,7 +40,7 @@ func NewTokenBucketRateLimiter(limit int) *TokenBucketRateLimiter {
 	if limit == 0 {
 		limit = 1000 // Bitbucket's default
 	}
-	
+
 	return &TokenBucketRateLimiter{
 		limit:      limit,
 		remaining:  limit,

@@ -107,7 +107,7 @@ func runBitbucketCloneCommand(cmd *cobra.Command, args []string, cloneConfig *Bi
 
 	// Validate Bitbucket credentials are provided
 	if globalConfig.BitbucketUsername == "" || globalConfig.BitbucketAppPassword == "" {
-		return fmt.Errorf("Bitbucket credentials required: set BITBUCKET_USERNAME and BITBUCKET_APP_PASSWORD environment variables")
+	return fmt.Errorf("bitbucket credentials required: set BITBUCKET_USERNAME and BITBUCKET_APP_PASSWORD environment variables")
 	}
 
 	// Initialize application
@@ -160,15 +160,15 @@ type bitbucketCloneTUIModel struct {
 // newBitbucketCloneTUIModel creates a new TUI model for bitbucket cloning
 func newBitbucketCloneTUIModel(app *Application, config *BitbucketCloneConfig, baseDir string, logger *logging.TUILogger) *bitbucketCloneTUIModel {
 	p := progress.New(progress.WithDefaultGradient())
-	
+
 	return &bitbucketCloneTUIModel{
-		app:     app,
-		config:  config,
-		baseDir: baseDir,
-		logger:  logger,
+		app:      app,
+		config:   config,
+		baseDir:  baseDir,
+		logger:   logger,
 		progress: p,
-		state:   "initializing",
-		logs:    []string{},
+		state:    "initializing",
+		logs:     []string{},
 	}
 }
 
@@ -193,7 +193,7 @@ func (m *bitbucketCloneTUIModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.repositories = msg.repositories
 		m.state = "cloning"
 		m.message = fmt.Sprintf("Found %d repositories. Starting clone...", len(msg.repositories))
-		
+
 		// Start cloning
 		return m, bitbucketStartCloningCmd(m.app, m.repositories, m.baseDir, m.config)
 
@@ -245,11 +245,11 @@ func (m *bitbucketCloneTUIModel) View() string {
 	s.WriteString(fmt.Sprintf("Owner: %s (%s)\n", m.config.Owner, m.config.Type.String()))
 	s.WriteString(fmt.Sprintf("Base Directory: %s\n", m.baseDir))
 	s.WriteString(fmt.Sprintf("State: %s\n\n", m.state))
-	
+
 	if m.message != "" {
 		s.WriteString(m.message + "\n\n")
 	}
-	
+
 	if m.state == "cloning" {
 		s.WriteString(m.progress.View() + "\n\n")
 	}

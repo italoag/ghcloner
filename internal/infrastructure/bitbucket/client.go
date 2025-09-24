@@ -15,19 +15,19 @@ import (
 
 // BitbucketAPIResponse represents the structure of Bitbucket API responses
 type BitbucketAPIResponse struct {
-	UUID        string        `json:"uuid"`
-	Name        string        `json:"name"`
-	FullName    string        `json:"full_name"`
-	Description string        `json:"description"`
-	Language    string        `json:"language"`
-	Size        int64         `json:"size"`
-	UpdatedOn   time.Time     `json:"updated_on"`
-	CreatedOn   time.Time     `json:"created_on"`
-	IsPrivate   bool          `json:"is_private"`
-	Parent      *ParentRepo   `json:"parent"`
-	Owner       OwnerInfo     `json:"owner"`
-	Links       LinksInfo     `json:"links"`
-	MainBranch  *MainBranch   `json:"mainbranch"`
+	UUID        string      `json:"uuid"`
+	Name        string      `json:"name"`
+	FullName    string      `json:"full_name"`
+	Description string      `json:"description"`
+	Language    string      `json:"language"`
+	Size        int64       `json:"size"`
+	UpdatedOn   time.Time   `json:"updated_on"`
+	CreatedOn   time.Time   `json:"created_on"`
+	IsPrivate   bool        `json:"is_private"`
+	Parent      *ParentRepo `json:"parent"`
+	Owner       OwnerInfo   `json:"owner"`
+	Links       LinksInfo   `json:"links"`
+	MainBranch  *MainBranch `json:"mainbranch"`
 }
 
 // ParentRepo represents parent repository for forks
@@ -219,7 +219,7 @@ func (c *BitbucketClient) fetchRepositoryPage(
 	if err != nil {
 		return nil, false, fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Update rate limiter from response
 	c.updateRateLimitFromResponse(resp)
@@ -345,7 +345,7 @@ func (c *BitbucketClient) GetRateLimitInfo(ctx context.Context) (*RateLimitInfo,
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	limit, _ := strconv.Atoi(resp.Header.Get("X-RateLimit-Limit"))
 	remaining, _ := strconv.Atoi(resp.Header.Get("X-RateLimit-Remaining"))
@@ -378,7 +378,7 @@ func (c *BitbucketClient) ValidateCredentials(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusUnauthorized {
 		return fmt.Errorf("invalid credentials")

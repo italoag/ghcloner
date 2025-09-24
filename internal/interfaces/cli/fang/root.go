@@ -183,12 +183,12 @@ func (app *Application) Close() error {
 
 // Config holds application configuration
 type Config struct {
-	Token               string // GitHub token
-	BitbucketUsername   string // Bitbucket username
+	Token                string // GitHub token
+	BitbucketUsername    string // Bitbucket username
 	BitbucketAppPassword string // Bitbucket app password
-	Concurrency         int
-	LogLevel            string
-	BaseDir             string
+	Concurrency          int
+	LogLevel             string
+	BaseDir              string
 }
 
 // NewDefaultConfig creates default configuration

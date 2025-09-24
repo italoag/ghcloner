@@ -87,7 +87,7 @@ func (uc *FetchRepositoriesUseCase) Execute(
 		)
 	case req.Type.IsBitbucketType():
 		if uc.bitbucketClient == nil {
-			return nil, fmt.Errorf("Bitbucket client not configured")
+		return nil, fmt.Errorf("bitbucket client not configured")
 		}
 		repositories, err = uc.bitbucketClient.FetchRepositories(
 			ctx,
