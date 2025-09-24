@@ -2,7 +2,7 @@
 
 > 🚀 Um clonador de repositórios GitHub de alta performance e concorrente, construído com Go
 
-[![CI](https://github.com/italoag/repoclonerr/workflows/CI/badge.svg)](https://github.com/italoag/repoclonerr/actions)
+[![CI](https://github.com/italoag/repocloner/workflows/CI/badge.svg)](https://github.com/italoag/repocloner/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/italoag/repoclonerr)](https://goreportcard.com/report/github.com/italoag/repoclonerr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.24.3+-blue.svg)](https://golang.org)
@@ -28,15 +28,15 @@
 
 ### 📦 Binários Pré-compilados
 
-Baixe a versão mais recente da [página de releases](https://github.com/italoag/repoclonerr/releases):
+Baixe a versão mais recente da [página de releases](https://github.com/italoag/repocloner/releases):
 
 ```bash
 # Linux (amd64)
-curl -L https://github.com/italoag/repoclonerr/releases/latest/download/repocloner-linux-amd64.tar.gz | tar xz
+curl -L https://github.com/italoag/repocloner/releases/latest/download/repocloner-linux-amd64.tar.gz | tar xz
 sudo mv repocloner /usr/local/bin/
 
 # macOS (amd64)
-curl -L https://github.com/italoag/repoclonerr/releases/latest/download/repocloner-darwin-amd64.tar.gz | tar xz
+curl -L https://github.com/italoag/repocloner/releases/latest/download/repocloner-darwin-amd64.tar.gz | tar xz
 sudo mv repocloner /usr/local/bin/
 
 # Windows (amd64)
@@ -47,7 +47,7 @@ sudo mv repocloner /usr/local/bin/
 
 ```bash
 # Instalar com Go (requer Go 1.24.3+)
-go install github.com/italoag/repoclonerr/cmd/repocloner@latest
+go install github.com/italoag/repocloner/cmd/repocloner@latest
 
 # Ou clone e compile
 git clone https://github.com/italoag/repoclonerr.git
@@ -431,9 +431,9 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 
 ## 📞 Suporte
 
-- 📧 **Issues**: [GitHub Issues](https://github.com/italoag/repoclonerr/issues)
-- 💬 **Discussões**: [GitHub Discussions](https://github.com/italoag/repoclonerr/discussions)
-- 📖 **Documentação**: [Wiki](https://github.com/italoag/repoclonerr/wiki)
+- 📧 **Issues**: [GitHub Issues](https://github.com/italoag/repocloner/issues)
+- 💬 **Discussões**: [GitHub Discussions](https://github.com/italoag/repocloner/discussions)
+- 📖 **Documentação**: [Wiki](https://github.com/italoag/repocloner/wiki)
 
 ---
 
