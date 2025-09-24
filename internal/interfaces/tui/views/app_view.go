@@ -139,7 +139,7 @@ func (v *AppView) renderCloning() string {
 	progress := v.model.GetProgress()
 
 	var content []string
-	content = append(content, titleStyle.Render("🚀 repocloner v20..0"))
+	content = append(content, titleStyle.Render("🚀 repocloner v0.2.0"))
 	content = append(content, headerStyle.Render("Cloning Repositories"))
 
 	if progress != nil {
