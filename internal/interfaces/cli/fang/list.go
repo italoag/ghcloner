@@ -11,10 +11,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/italoag/ghcloner/internal/application/usecases"
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/infrastructure/github"
-	"github.com/italoag/ghcloner/internal/infrastructure/logging"
+	"github.com/italoag/repocloner/internal/application/usecases"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/infrastructure/github"
+	"github.com/italoag/repocloner/internal/infrastructure/logging"
 )
 
 // ListConfig holds list command configuration
@@ -58,16 +58,16 @@ Sorting Options:
   size               Sort by repository size (largest first)
   updated            Sort by last update time (most recent first)`,
 		Example: `  # List user repositories in table format
-  ghclone list user octocat
+  repocloner list user octocat
 
   # List organization repositories in JSON format
-  ghclone list org microsoft --format json
+  repocloner list org microsoft --format json
 
   # List repositories with filtering
-  ghclone list user torvalds --include-forks --language c --limit 20
+  repocloner list user torvalds --include-forks --language c --limit 20
 
   # List repositories by size with custom filters
-  ghclone list org kubernetes --sort size --min-size 1000000 --format csv`,
+  repocloner list org kubernetes --sort size --min-size 1000000 --format csv`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runListCommand(cmd, args, &listConfig)
@@ -161,7 +161,7 @@ func executeList(config *ListConfig, globalConfig *Config) error {
 	// Initialize GitHub client
 	githubClient := github.NewGitHubClient(&github.GitHubClientConfig{
 		Token:       globalConfig.Token,
-		UserAgent:   "ghclone/0.2",
+		UserAgent:   "repocloner/0.2",
 		Timeout:     30 * time.Second,
 		RateLimiter: github.NewTokenBucketRateLimiter(5000),
 		Logger:      logger,

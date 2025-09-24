@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/domain/shared"
 )
 
 // Git-specific errors
@@ -270,7 +270,7 @@ func (v *GitValidator) validateParentDirectory(parentDir string) error {
 	}
 
 	// Test write permissions by trying to create a temporary file
-	tempFile := filepath.Join(parentDir, ".ghclone_write_test")
+	tempFile := filepath.Join(parentDir, ".repocloner_write_test")
 	file, err := os.Create(tempFile)
 	if err != nil {
 		return fmt.Errorf("parent directory is not writable: %w", err)

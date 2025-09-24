@@ -8,12 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/italoag/ghcloner/internal/application/services"
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/infrastructure/concurrency"
-	"github.com/italoag/ghcloner/internal/infrastructure/git"
-	"github.com/italoag/ghcloner/internal/infrastructure/github"
-	"github.com/italoag/ghcloner/internal/infrastructure/logging"
+	"github.com/italoag/repocloner/internal/application/services"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/infrastructure/concurrency"
+	"github.com/italoag/repocloner/internal/infrastructure/git"
+	"github.com/italoag/repocloner/internal/infrastructure/github"
+	"github.com/italoag/repocloner/internal/infrastructure/logging"
 )
 
 // Integration test configuration
@@ -49,7 +49,7 @@ func TestGitHubClient_Integration(t *testing.T) {
 
 	client := github.NewGitHubClient(&github.GitHubClientConfig{
 		Token:       config.GitHubToken,
-		UserAgent:   "ghclone-test/1.0",
+		UserAgent:   "repocloner-test/1.0",
 		Timeout:     config.TestTimeout,
 		RateLimiter: github.NewNoOpRateLimiter(),
 		Logger:      logger,

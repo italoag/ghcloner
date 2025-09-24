@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/italoag/ghcloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/repository"
 )
 
 // JobStatus represents the status of a clone job

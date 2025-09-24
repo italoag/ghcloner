@@ -9,15 +9,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/italoag/ghcloner/internal/application/services"
-	"github.com/italoag/ghcloner/internal/application/usecases"
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/domain/shared"
-	"github.com/italoag/ghcloner/internal/infrastructure/concurrency"
-	"github.com/italoag/ghcloner/internal/infrastructure/git"
-	"github.com/italoag/ghcloner/internal/infrastructure/github"
-	"github.com/italoag/ghcloner/internal/infrastructure/logging"
+	"github.com/italoag/repocloner/internal/application/services"
+	"github.com/italoag/repocloner/internal/application/usecases"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/infrastructure/concurrency"
+	"github.com/italoag/repocloner/internal/infrastructure/git"
+	"github.com/italoag/repocloner/internal/infrastructure/github"
+	"github.com/italoag/repocloner/internal/infrastructure/logging"
 )
 
 // Command represents a CLI command
@@ -80,17 +80,17 @@ func (app *CLIApplication) Execute(args []string) error {
 
 // showUsage shows general usage information
 func (app *CLIApplication) showUsage() error {
-	fmt.Println("ghclone v0.2.0 - Concurrent GitHub Repository Cloner")
+	fmt.Println("repocloner v0.2.0 - Concurrent GitHub Repository Cloner")
 	fmt.Println()
 	fmt.Println("USAGE:")
-	fmt.Println("  ghclone <command> [arguments]")
+	fmt.Println("  repocloner <command> [arguments]")
 	fmt.Println()
 	fmt.Println("COMMANDS:")
 	for name, cmd := range app.commands {
 		fmt.Printf("  %-10s %s\n", name, cmd.Description())
 	}
 	fmt.Println()
-	fmt.Println("Use 'ghclone help <command>' for more information about a command.")
+	fmt.Println("Use 'repocloner help <command>' for more information about a command.")
 	return nil
 }
 
@@ -118,7 +118,7 @@ func (c *CloneCommand) Description() string {
 
 // Usage returns the command usage
 func (c *CloneCommand) Usage() string {
-	return `Usage: ghclone clone [options] <type> <owner>
+	return `Usage: repocloner clone [options] <type> <owner>
 
 ARGUMENTS:
   type    Repository owner type ('user' or 'org')
@@ -135,10 +135,10 @@ OPTIONS:
   --log-level <level>     Log level (debug, info, warn, error) (default: info)
 
 EXAMPLES:
-  ghclone clone user octocat
-  ghclone clone org microsoft --token ghp_abc123
-  ghclone clone user torvalds --concurrency 4 --include-forks
-  ghclone clone org kubernetes --base-dir /tmp/repos --log-level debug
+  repocloner clone user octocat
+  repocloner clone org microsoft --token ghp_abc123
+  repocloner clone user torvalds --concurrency 4 --include-forks
+  repocloner clone org kubernetes --base-dir /tmp/repos --log-level debug
 `
 }
 
@@ -280,7 +280,7 @@ func (c *CloneCommand) executeClone(ctx context.Context, config *CloneConfig) er
 	// Initialize GitHub client
 	githubClient := github.NewGitHubClient(&github.GitHubClientConfig{
 		Token:       config.Token,
-		UserAgent:   "ghclone/2.0",
+		UserAgent:   "repocloner/2.0",
 		Timeout:     30 * time.Second,
 		RateLimiter: github.NewTokenBucketRateLimiter(5000),
 		Logger:      logger.With(shared.StringField("component", "github")),

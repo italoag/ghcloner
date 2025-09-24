@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/italoag/ghcloner/internal/interfaces/cli/fang"
+	"github.com/italoag/repocloner/internal/interfaces/cli/fang"
 )
 
 func main() {

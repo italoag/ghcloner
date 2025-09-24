@@ -9,11 +9,11 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/italoag/ghcloner/internal/application/services"
-	"github.com/italoag/ghcloner/internal/application/usecases"
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/application/services"
+	"github.com/italoag/repocloner/internal/application/usecases"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/shared"
 )
 
 // AppModel represents the main application model
@@ -459,11 +459,11 @@ func (m *AppModel) GetProgressView() string {
 func (m *AppModel) View() string {
 	// Import would cause circular dependency, so provide simple view
 	if m.quitting {
-		return "Thanks for using ghclone! Shutting down...\n"
+		return "Thanks for using repocloner! Shutting down...\n"
 	}
 
 	var content []string
-	content = append(content, "🚀 ghclone v0.2.0")
+	content = append(content, "🚀 repocloner v0.2.0")
 	content = append(content, "State: "+m.state.String())
 	content = append(content, "Status: "+m.statusMsg)
 

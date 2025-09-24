@@ -14,11 +14,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
-	"github.com/italoag/ghcloner/internal/application/usecases"
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/domain/shared"
-	"github.com/italoag/ghcloner/internal/infrastructure/logging"
+	"github.com/italoag/repocloner/internal/application/usecases"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/infrastructure/logging"
 )
 
 // CloneConfig holds clone command configuration
@@ -51,16 +51,16 @@ Repository Types:
 The command supports advanced filtering options, configurable concurrency,
 and comprehensive error handling with detailed progress reporting.`,
 		Example: `  # Clone all repositories from a user
-  ghclone clone user octocat
+  repocloner clone user octocat
 
   # Clone organization repositories skipping forks
-  ghclone clone org microsoft --skip-forks
+  repocloner clone org microsoft --skip-forks
 
   # Clone with custom concurrency and depth
-  ghclone clone user torvalds --concurrency 8 --depth 5
+  repocloner clone user torvalds --concurrency 8 --depth 5
 
   # Clone specific branch with custom base directory
-  ghclone clone org kubernetes --branch main --base-dir /tmp/repos`,
+  repocloner clone org kubernetes --branch main --base-dir /tmp/repos`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runCloneCommand(cmd, args, &cloneConfig)
@@ -121,7 +121,7 @@ func runCloneCommand(cmd *cobra.Command, args []string, cloneConfig *CloneConfig
 	}()
 
 	// Show configuration info before starting TUI
-	fmt.Printf("ghclone v0.2.0 - Concurrent GitHub Repository Cloner\n")
+	fmt.Printf("repocloner v0.2.0 - Concurrent GitHub Repository Cloner\n")
 	fmt.Printf("Target: %s/%s\n", cloneConfig.Type, cloneConfig.Owner)
 	fmt.Printf("Concurrency: %d workers\n", globalConfig.Concurrency)
 	fmt.Printf("Base directory: %s\n", globalConfig.BaseDir)
@@ -318,7 +318,7 @@ func (m cloneTUIModel) View() string {
 		Foreground(lipgloss.Color("#FAFAFA")).
 		Background(lipgloss.Color("#7D56F4")).
 		Padding(0, 1).
-		Render("🚀 ghclone v0.2.0 - Concurrent GitHub Repository Cloner")
+		Render("🚀 repocloner v0.2.0 - Concurrent GitHub Repository Cloner")
 
 	// Progress info
 	info := fmt.Sprintf("Cloning repositories to '%s' directory...", filepath.Join(m.globalConfig.BaseDir, m.cloneConfig.Owner))

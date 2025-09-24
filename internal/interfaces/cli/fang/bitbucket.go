@@ -13,11 +13,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
-	"github.com/italoag/ghcloner/internal/application/usecases"
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/domain/shared"
-	"github.com/italoag/ghcloner/internal/infrastructure/logging"
+	"github.com/italoag/repocloner/internal/application/usecases"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/infrastructure/logging"
 )
 
 // BitbucketCloneConfig holds bitbucket clone command configuration

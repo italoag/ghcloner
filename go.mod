@@ -1,4 +1,4 @@
-module github.com/italoag/ghcloner
+module github.com/italoag/repocloner
 
 go 1.24.3
 

@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/domain/shared"
-	"github.com/italoag/ghcloner/internal/infrastructure/concurrency"
-	"github.com/italoag/ghcloner/internal/infrastructure/git"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/infrastructure/concurrency"
+	"github.com/italoag/repocloner/internal/infrastructure/git"
 )
 
 // CloningService provides high-level cloning operations

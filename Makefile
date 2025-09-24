@@ -1,7 +1,7 @@
 # Project Configuration
-NAME            := ghclone
+NAME            := repocloner
 VERSION         ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "v0.1.0")
-PACKAGE         := github.com/italoag/ghcloner
+PACKAGE         := github.com/italoag/repocloner
 OUTPUT_BIN      ?= build/${NAME}
 GO_FLAGS        ?=
 GO_TAGS         ?= netgo
@@ -26,7 +26,7 @@ endif
 PLATFORMS       := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
 BUILD_DIR       := build
 DIST_DIR        := dist
-CMD_DIR         := cmd/ghclone
+CMD_DIR         := cmd/repocloner
 
 # LDFLAGS for version injection
 LDFLAGS         := -w -s \

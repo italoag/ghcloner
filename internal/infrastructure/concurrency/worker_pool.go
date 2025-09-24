@@ -9,9 +9,9 @@ import (
 
 	"github.com/panjf2000/ants/v2"
 
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/domain/shared"
-	"github.com/italoag/ghcloner/internal/infrastructure/git"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/infrastructure/git"
 )
 
 // WorkerPool manages concurrent cloning operations using ants
