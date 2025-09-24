@@ -1,13 +1,13 @@
 # ghclone
 
-> 🚀 A high-performance, concurrent GitHub repository cloner built with Go
+> 🚀 A high-performance, concurrent GitHub and Bitbucket repository cloner built with Go
 
 [![CI](https://github.com/italoag/ghcloner/workflows/CI/badge.svg)](https://github.com/italoag/ghcloner/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/italoag/ghcloner)](https://goreportcard.com/report/github.com/italoag/ghcloner)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.24.3+-blue.svg)](https://golang.org)
 
-**ghclone** is a powerful command-line tool designed for efficiently cloning multiple GitHub repositories concurrently. It features an enhanced terminal UI with real-time progress tracking, structured logging, and intelligent worker pool management.
+**ghclone** is a powerful command-line tool designed for efficiently cloning multiple GitHub and Bitbucket repositories concurrently. It features an enhanced terminal UI with real-time progress tracking, structured logging, and intelligent worker pool management.
 
 **📖 [Versão em Português](README_pt.md)**
 
@@ -16,10 +16,10 @@
 - **🔄 Concurrent Processing**: Clone multiple repositories simultaneously using configurable worker pools
 - **📊 Real-time Progress Tracking**: Interactive terminal UI with live progress updates
 - **🎯 Smart Filtering**: Advanced filtering by language, size, fork status, and update date
-- **📁 Flexible Organization**: Support for both GitHub users and organizations
+- **📁 Flexible Organization**: Support for GitHub (users/orgs) and Bitbucket (users/workspaces)
 - **🛠️ Multiple Interfaces**: Choose between CLI and TUI (Terminal User Interface)
 - **📋 Multiple Output Formats**: Export repository lists as table, JSON, or CSV
-- **🔐 Token Support**: GitHub API token integration with rate limiting
+- **🔐 Token Support**: GitHub API token and Bitbucket API token integration with rate limiting
 - **🏗️ Domain-Driven Design**: Clean architecture with SOLID principles
 - **📝 Structured Logging**: Comprehensive logging with configurable levels
 - **🐳 Docker Support**: Ready-to-use Docker images
@@ -74,11 +74,17 @@ echo 'alias ghclone="docker run --rm -v $(pwd):/workspace ghcr.io/italoag/ghclon
 ### 🎯 Quick Start
 
 ```bash
-# Clone all repositories from a user
+# Clone all repositories from a GitHub user
 ghclone clone user octocat
 
-# Clone organization repositories (skip forks)
+# Clone GitHub organization repositories (skip forks)
 ghclone clone org microsoft --skip-forks
+
+# Clone all repositories from a Bitbucket user
+ghclone bitbucket user myusername
+
+# Clone Bitbucket workspace repositories
+ghclone bitbucket workspace myworkspace --skip-forks
 
 # List repositories in JSON format
 ghclone list user torvalds --format json
@@ -87,7 +93,7 @@ ghclone list user torvalds --format json
 ghclone clone user kubernetes --concurrency 16 --depth 1 --base-dir ./repos
 ```
 
-### 🔧 Clone Command
+### 🔧 GitHub Clone Command
 
 Clone repositories from a GitHub user or organization:
 
@@ -116,6 +122,43 @@ ghclone clone org kubernetes --branch main --depth 5
 
 # Clone with debug logging
 ghclone clone user facebook --log-level debug
+```
+
+### 🪣 Bitbucket Clone Command
+
+Clone repositories from a Bitbucket user or workspace:
+
+```bash
+ghclone bitbucket [type] [owner] [flags]
+```
+
+**Repository Types:**
+- `user` or `users` - Clone from a Bitbucket user account
+- `workspace` or `workspaces` - Clone from a Bitbucket workspace
+
+**Authentication:**
+Requires Bitbucket API token:
+```bash
+export BITBUCKET_API_TOKEN=your-api-token
+```
+
+**Examples:**
+
+```bash
+# Basic user cloning
+ghclone bitbucket user myusername
+
+# Workspace with custom concurrency
+ghclone bitbucket workspace myworkspace --concurrency 8
+
+# Include forks and set custom directory
+ghclone bitbucket user myuser --include-forks --base-dir /tmp/repos
+
+# Clone specific branch with shallow depth
+ghclone bitbucket workspace myws --branch develop --depth 3
+
+# Clone with debug logging
+ghclone bitbucket user myuser --log-level debug
 ```
 
 **Available Flags:**
@@ -179,6 +222,8 @@ ghclone list org google --format csv --sort updated
 
 ### 🔑 Authentication
 
+#### GitHub Authentication
+
 ghclone supports GitHub personal access tokens for higher rate limits and private repository access:
 
 ```bash
@@ -189,10 +234,27 @@ export GITHUB_TOKEN="your_token_here"
 ghclone clone user octocat --token "your_token_here"
 ```
 
-**Creating a Token:**
+**Creating a GitHub Token:**
 1. Go to GitHub Settings → Developer settings → Personal access tokens
 2. Generate a new token with `repo` scope
 3. Copy the token and set it as an environment variable
+
+#### Bitbucket Authentication
+
+ghclone supports Bitbucket API tokens for authentication:
+
+```bash
+# Set via environment variable
+export BITBUCKET_API_TOKEN="your-api-token"
+
+# Or pass directly
+ghclone bitbucket user myuser --bitbucket-api-token "your-api-token"
+```
+
+**Creating a Bitbucket API Token:**
+1. Go to Bitbucket Settings → Personal Bitbucket settings → API tokens
+2. Create a new API token with `Repositories: Read` permission
+3. Copy the API token and set it as an environment variable
 
 ### 🎨 Terminal UI Features
 

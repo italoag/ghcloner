@@ -13,6 +13,7 @@ import (
 	"github.com/italoag/ghcloner/internal/application/usecases"
 	"github.com/italoag/ghcloner/internal/domain/cloning"
 	"github.com/italoag/ghcloner/internal/domain/shared"
+	"github.com/italoag/ghcloner/internal/infrastructure/bitbucket"
 	"github.com/italoag/ghcloner/internal/infrastructure/concurrency"
 	"github.com/italoag/ghcloner/internal/infrastructure/git"
 	"github.com/italoag/ghcloner/internal/infrastructure/github"
@@ -23,6 +24,7 @@ import (
 type Application struct {
 	logger                   shared.Logger
 	githubClient             *github.GitHubClient
+	bitbucketClient          *bitbucket.BitbucketClient
 	gitClient                *git.GitClient
 	workerPool               *concurrency.WorkerPool
 	domainService            *cloning.DomainCloneService
@@ -71,6 +73,27 @@ func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 		}
 	}
 
+	// Initialize Bitbucket client
+	bitbucketClient := bitbucket.NewBitbucketClient(&bitbucket.BitbucketClientConfig{
+		APIToken:    config.BitbucketAPIToken,
+		UserAgent:   "ghclone/0.2",
+		Timeout:     30 * time.Second,
+		RateLimiter: bitbucket.NewTokenBucketRateLimiter(1000), // Bitbucket default limit
+		Logger:      logger.With(shared.StringField("component", "bitbucket_client")),
+	})
+
+	// Validate Bitbucket credentials if provided
+	if config.BitbucketAPIToken != "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := bitbucketClient.ValidateCredentials(ctx); err != nil {
+			logger.Warn("Bitbucket credentials validation failed", shared.ErrorField(err))
+		} else {
+			logger.Info("Bitbucket credentials validated successfully")
+		}
+	}
+
 	// Initialize Git client
 	gitClient, err := git.NewGitClient(&git.GitClientConfig{
 		Timeout: 10 * time.Minute,
@@ -110,6 +133,7 @@ func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 	// Initialize use cases
 	fetchRepositoriesUseCase := usecases.NewFetchRepositoriesUseCase(
 		githubClient,
+		bitbucketClient,
 		logger.With(shared.StringField("usecase", "fetch_repositories")),
 	)
 
@@ -125,6 +149,7 @@ func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 	return &Application{
 		logger:                   logger,
 		githubClient:             githubClient,
+		bitbucketClient:          bitbucketClient,
 		gitClient:                gitClient,
 		workerPool:               workerPool,
 		domainService:            domainService,
@@ -157,10 +182,11 @@ func (app *Application) Close() error {
 
 // Config holds application configuration
 type Config struct {
-	Token       string
-	Concurrency int
-	LogLevel    string
-	BaseDir     string
+	Token             string // GitHub token
+	BitbucketAPIToken string // Bitbucket API token
+	Concurrency       int
+	LogLevel          string
+	BaseDir           string
 }
 
 // NewDefaultConfig creates default configuration
@@ -176,8 +202,8 @@ func NewDefaultConfig() *Config {
 func NewRootCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ghclone",
-		Short: "Concurrent GitHub Repository Cloner",
-		Long: `ghclone is a high-performance, concurrent GitHub repository cloner built with Go.
+		Short: "Concurrent GitHub and Bitbucket Repository Cloner",
+		Long: `ghclone is a high-performance, concurrent repository cloner built with Go.
 
 It provides enhanced terminal UI experiences with real-time progress tracking,
 structured logging, and efficient concurrent processing using worker pools.
@@ -186,15 +212,22 @@ Features:
   • Concurrent cloning with configurable worker pools
   • Real-time progress tracking with TUI
   • Structured logging with file output and TUI display
-  • Support for both user and organization repositories
+  • Support for GitHub (users and organizations) and Bitbucket (users and workspaces)
   • Advanced filtering and configuration options
-  • GitHub API rate limiting and token validation`,
+  • GitHub API rate limiting and token validation
+  • Bitbucket API v2.0 support with API token authentication`,
 		Version: "0.2.0",
-		Example: `  # Clone all repositories from a user
+		Example: `  # Clone all repositories from a GitHub user
   ghclone clone user octocat
 
-  # Clone organization repositories with custom settings
+  # Clone GitHub organization repositories with custom settings
   ghclone clone org microsoft --concurrency 8 --skip-forks
+
+  # Clone all repositories from a Bitbucket user
+  ghclone bitbucket user myusername
+
+  # Clone Bitbucket workspace repositories
+  ghclone bitbucket workspace myworkspace --skip-forks
 
   # List repositories in JSON format
   ghclone list user torvalds --format json --include-forks
@@ -207,6 +240,7 @@ Features:
 
 	// Add global flags
 	cmd.PersistentFlags().String("token", "", "GitHub personal access token (env: GITHUB_TOKEN)")
+	cmd.PersistentFlags().String("bitbucket-api-token", "", "Bitbucket API token (env: BITBUCKET_API_TOKEN)")
 	cmd.PersistentFlags().String("log-level", "info", "Log level (debug, info, warn, error)")
 	cmd.PersistentFlags().Int("concurrency", runtime.NumCPU()*2, "Number of concurrent workers")
 	cmd.PersistentFlags().String("base-dir", ".", "Base directory for operations")
@@ -220,6 +254,7 @@ func Execute(ctx context.Context) error {
 
 	// Add all subcommands
 	rootCmd.AddCommand(NewCloneCommand())
+	rootCmd.AddCommand(NewBitbucketCloneCommand())
 	rootCmd.AddCommand(NewListCommand())
 
 	// Apply Fang styling and enhancements
@@ -232,6 +267,10 @@ func getGlobalConfig(cmd *cobra.Command) (*Config, error) {
 
 	if token, err := cmd.Flags().GetString("token"); err == nil && token != "" {
 		config.Token = token
+	}
+
+	if token, err := cmd.Flags().GetString("bitbucket-api-token"); err == nil && token != "" {
+		config.BitbucketAPIToken = token
 	}
 
 	if logLevel, err := cmd.Flags().GetString("log-level"); err == nil && logLevel != "" {
