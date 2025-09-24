@@ -1,13 +1,13 @@
-# ghclone
+# repocloner
 
 > 🚀 Um clonador de repositórios GitHub de alta performance e concorrente, construído com Go
 
-[![CI](https://github.com/italoag/ghcloner/workflows/CI/badge.svg)](https://github.com/italoag/ghcloner/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/italoag/ghcloner)](https://goreportcard.com/report/github.com/italoag/ghcloner)
+[![CI](https://github.com/italoag/repoclonerr/workflows/CI/badge.svg)](https://github.com/italoag/repoclonerr/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/italoag/repoclonerr)](https://goreportcard.com/report/github.com/italoag/repoclonerr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.24.3+-blue.svg)](https://golang.org)
 
-**ghclone** é uma poderosa ferramenta de linha de comando projetada para clonar eficientemente múltiplos repositórios GitHub de forma concorrente. Possui uma interface de terminal aprimorada com rastreamento de progresso em tempo real, logging estruturado e gerenciamento inteligente de pool de workers.
+**repocloner** é uma poderosa ferramenta de linha de comando projetada para clonar eficientemente múltiplos repositórios GitHub de forma concorrente. Possui uma interface de terminal aprimorada com rastreamento de progresso em tempo real, logging estruturado e gerenciamento inteligente de pool de workers.
 
 **📖 [English Version](README.md)**
 
@@ -28,45 +28,45 @@
 
 ### 📦 Binários Pré-compilados
 
-Baixe a versão mais recente da [página de releases](https://github.com/italoag/ghcloner/releases):
+Baixe a versão mais recente da [página de releases](https://github.com/italoag/repoclonerr/releases):
 
 ```bash
 # Linux (amd64)
-curl -L https://github.com/italoag/ghcloner/releases/latest/download/ghclone-linux-amd64.tar.gz | tar xz
-sudo mv ghclone /usr/local/bin/
+curl -L https://github.com/italoag/repoclonerr/releases/latest/download/repocloner-linux-amd64.tar.gz | tar xz
+sudo mv repocloner /usr/local/bin/
 
 # macOS (amd64)
-curl -L https://github.com/italoag/ghcloner/releases/latest/download/ghclone-darwin-amd64.tar.gz | tar xz
-sudo mv ghclone /usr/local/bin/
+curl -L https://github.com/italoag/repoclonerr/releases/latest/download/repocloner-darwin-amd64.tar.gz | tar xz
+sudo mv repocloner /usr/local/bin/
 
 # Windows (amd64)
-# Baixe o ghclone-windows-amd64.zip e extraia para seu PATH
+# Baixe o repocloner-windows-amd64.zip e extraia para seu PATH
 ```
 
 ### 🐹 Do Código Fonte (Go)
 
 ```bash
 # Instalar com Go (requer Go 1.24.3+)
-go install github.com/italoag/ghcloner/cmd/ghclone@latest
+go install github.com/italoag/repoclonerr/cmd/repocloner@latest
 
 # Ou clone e compile
-git clone https://github.com/italoag/ghcloner.git
-cd ghcloner
+git clone https://github.com/italoag/repoclonerr.git
+cd repoclonerr
 make build
-sudo cp build/ghclone /usr/local/bin/
+sudo cp build/repocloner /usr/local/bin/
 ```
 
 ### 🐳 Docker
 
 ```bash
 # Baixar a imagem
-docker pull ghcr.io/italoag/ghclone:latest
+docker pull ghcr.io/italoag/repocloner:latest
 
 # Executar com Docker
-docker run --rm -v $(pwd):/workspace ghcr.io/italoag/ghclone:latest clone user octocat
+docker run --rm -v $(pwd):/workspace ghcr.io/italoag/repocloner:latest clone user octocat
 
 # Criar um alias para conveniência
-echo 'alias ghclone="docker run --rm -v $(pwd):/workspace ghcr.io/italoag/ghclone:latest"' >> ~/.bashrc
+echo 'alias repocloner="docker run --rm -v $(pwd):/workspace ghcr.io/italoag/repocloner:latest"' >> ~/.bashrc
 ```
 
 ## 📚 Uso
@@ -75,16 +75,16 @@ echo 'alias ghclone="docker run --rm -v $(pwd):/workspace ghcr.io/italoag/ghclon
 
 ```bash
 # Clonar todos os repositórios de um usuário
-ghclone clone user octocat
+repocloner clone user octocat
 
 # Clonar repositórios de organização (pular forks)
-ghclone clone org microsoft --skip-forks
+repocloner clone org microsoft --skip-forks
 
 # Listar repositórios em formato JSON
-ghclone list user torvalds --format json
+repocloner list user torvalds --format json
 
 # Clonar com configurações personalizadas
-ghclone clone user kubernetes --concurrency 16 --depth 1 --base-dir ./repos
+repocloner clone user kubernetes --concurrency 16 --depth 1 --base-dir ./repos
 ```
 
 ### 🔧 Comando Clone
@@ -92,7 +92,7 @@ ghclone clone user kubernetes --concurrency 16 --depth 1 --base-dir ./repos
 Clone repositórios de um usuário ou organização GitHub:
 
 ```bash
-ghclone clone [type] [owner] [flags]
+repocloner clone [type] [owner] [flags]
 ```
 
 **Tipos de Repositório:**
@@ -103,19 +103,19 @@ ghclone clone [type] [owner] [flags]
 
 ```bash
 # Clonagem básica de usuário
-ghclone clone user octocat
+repocloner clone user octocat
 
 # Organização com concorrência personalizada
-ghclone clone org microsoft --concurrency 8
+repocloner clone org microsoft --concurrency 8
 
 # Incluir forks e definir diretório personalizado
-ghclone clone user torvalds --include-forks --base-dir /tmp/repos
+repocloner clone user torvalds --include-forks --base-dir /tmp/repos
 
 # Clonar branch específica com profundidade rasa
-ghclone clone org kubernetes --branch main --depth 5
+repocloner clone org kubernetes --branch main --depth 5
 
 # Clonar com logging de debug
-ghclone clone user facebook --log-level debug
+repocloner clone user facebook --log-level debug
 ```
 
 **Flags Disponíveis:**
@@ -136,29 +136,29 @@ ghclone clone user facebook --log-level debug
 Liste e filtre repositórios sem clonar:
 
 ```bash
-ghclone list [type] [owner] [flags]
+repocloner list [type] [owner] [flags]
 ```
 
 **Exemplos:**
 
 ```bash
 # Listar repositórios de usuário em formato tabela
-ghclone list user octocat
+repocloner list user octocat
 
 # Exportar repositórios de organização como JSON
-ghclone list org microsoft --format json
+repocloner list org microsoft --format json
 
 # Filtrar por linguagem e tamanho
-ghclone list user torvalds --language c --min-size 1000000
+repocloner list user torvalds --language c --min-size 1000000
 
 # Ordenar por tamanho e limitar resultados
-ghclone list org kubernetes --sort size --limit 20
+repocloner list org kubernetes --sort size --limit 20
 
 # Filtrar por data de atualização
-ghclone list user facebook --updated-after 2024-01-01
+repocloner list user facebook --updated-after 2024-01-01
 
 # Exportar como CSV para planilhas
-ghclone list org google --format csv --sort updated
+repocloner list org google --format csv --sort updated
 ```
 
 **Flags Disponíveis:**
@@ -179,14 +179,14 @@ ghclone list org google --format csv --sort updated
 
 ### 🔑 Autenticação
 
-ghclone suporta tokens de acesso pessoal GitHub para maiores limites de taxa e acesso a repositórios privados:
+repocloner suporta tokens de acesso pessoal GitHub para maiores limites de taxa e acesso a repositórios privados:
 
 ```bash
 # Definir via variável de ambiente
 export GITHUB_TOKEN="seu_token_aqui"
 
 # Ou passar diretamente
-ghclone clone user octocat --token "seu_token_aqui"
+repocloner clone user octocat --token "seu_token_aqui"
 ```
 
 **Criando um Token:**
@@ -196,7 +196,7 @@ ghclone clone user octocat --token "seu_token_aqui"
 
 ### 🎨 Funcionalidades da Interface Terminal
 
-Ao clonar repositórios, ghclone fornece uma interface terminal rica:
+Ao clonar repositórios, repocloner fornece uma interface terminal rica:
 
 - **📊 Progresso em Tempo Real**: Atualizações ao vivo do progresso da clonagem
 - **⚡ Métricas de Throughput**: Velocidade atual e tempo estimado de conclusão
@@ -219,7 +219,7 @@ Você pode personalizar o diretório base:
 
 ```bash
 # Diretório base personalizado
-ghclone clone user octocat --base-dir /home/user/projetos
+repocloner clone user octocat --base-dir /home/user/projetos
 
 # Isso cria:
 /home/user/projetos/
@@ -230,10 +230,10 @@ ghclone clone user octocat --base-dir /home/user/projetos
 
 ## 🏗️ Arquitetura
 
-ghclone é construído com princípios de arquitetura limpa:
+repocloner é construído com princípios de arquitetura limpa:
 
 ```
-cmd/ghclone/           # Ponto de entrada da aplicação
+cmd/repocloner/           # Ponto de entrada da aplicação
 ├── main.go
 
 internal/
@@ -273,8 +273,8 @@ internal/
 
 ```bash
 # Clonar o repositório
-git clone https://github.com/italoag/ghcloner.git
-cd ghcloner
+git clone https://github.com/italoag/repoclonerr.git
+cd repoclonerr
 
 # Compilar para plataforma atual
 make build
@@ -351,7 +351,7 @@ Agradecemos contribuições! Por favor, veja nossas [Diretrizes de Contribuiçã
 Ao relatar bugs, por favor inclua:
 - Sistema operacional e versão
 - Versão do Go
-- Versão do ghclone (`ghclone --version`)
+- Versão do repocloner (`repocloner --version`)
 - Passos para reproduzir
 - Comportamento esperado vs real
 - Quaisquer logs ou mensagens de erro relevantes
@@ -365,7 +365,7 @@ Adoraríamos ouvir suas ideias! Por favor, abra uma issue com:
 
 ## 📊 Performance
 
-ghclone é otimizado para performance:
+repocloner é otimizado para performance:
 
 - **Processamento Concorrente**: Pools de workers configuráveis (padrão: 8 workers)
 - **Eficiência de Memória**: Operações de streaming onde possível
@@ -388,7 +388,7 @@ ghclone é otimizado para performance:
 curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user
 
 # Verificar escopos do token
-ghclone list user octocat --log-level debug
+repocloner list user octocat --log-level debug
 ```
 
 **Limitação de Taxa:**
@@ -397,13 +397,13 @@ ghclone list user octocat --log-level debug
 export GITHUB_TOKEN="seu_token_aqui"
 
 # Reduzir concorrência
-ghclone clone org org-grande --concurrency 4
+repocloner clone org org-grande --concurrency 4
 ```
 
 **Problemas de Rede:**
 ```bash
 # Habilitar logging de debug
-ghclone clone user octocat --log-level debug
+repocloner clone user octocat --log-level debug
 
 # Verificar conectividade
 curl -I https://api.github.com
@@ -415,7 +415,7 @@ curl -I https://api.github.com
 ls -la $(pwd)
 
 # Usar diretório personalizado
-ghclone clone user octocat --base-dir /tmp/repos
+repocloner clone user octocat --base-dir /tmp/repos
 ```
 
 ## 📄 Licença
@@ -431,9 +431,9 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 
 ## 📞 Suporte
 
-- 📧 **Issues**: [GitHub Issues](https://github.com/italoag/ghcloner/issues)
-- 💬 **Discussões**: [GitHub Discussions](https://github.com/italoag/ghcloner/discussions)
-- 📖 **Documentação**: [Wiki](https://github.com/italoag/ghcloner/wiki)
+- 📧 **Issues**: [GitHub Issues](https://github.com/italoag/repoclonerr/issues)
+- 💬 **Discussões**: [GitHub Discussions](https://github.com/italoag/repoclonerr/discussions)
+- 📖 **Documentação**: [Wiki](https://github.com/italoag/repoclonerr/wiki)
 
 ---
 

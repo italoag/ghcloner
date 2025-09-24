@@ -10,14 +10,14 @@ import (
 	"github.com/charmbracelet/fang"
 	"github.com/spf13/cobra"
 
-	"github.com/italoag/ghcloner/internal/application/usecases"
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/domain/shared"
-	"github.com/italoag/ghcloner/internal/infrastructure/bitbucket"
-	"github.com/italoag/ghcloner/internal/infrastructure/concurrency"
-	"github.com/italoag/ghcloner/internal/infrastructure/git"
-	"github.com/italoag/ghcloner/internal/infrastructure/github"
-	"github.com/italoag/ghcloner/internal/infrastructure/logging"
+	"github.com/italoag/repocloner/internal/application/usecases"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/infrastructure/bitbucket"
+	"github.com/italoag/repocloner/internal/infrastructure/concurrency"
+	"github.com/italoag/repocloner/internal/infrastructure/git"
+	"github.com/italoag/repocloner/internal/infrastructure/github"
+	"github.com/italoag/repocloner/internal/infrastructure/logging"
 )
 
 // Application represents the main application with all dependencies
@@ -36,7 +36,7 @@ type Application struct {
 func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 	// Initialize TUI logger that writes to file and buffers for display
 	tuiLogger, err := logging.NewTUILogger(&logging.TUILoggerConfig{
-		LogFile:     "logs/ghclone.log",
+		LogFile:     "logs/repocloner.log",
 		Level:       config.LogLevel,
 		BufferSize:  50,
 		Development: true,
@@ -48,14 +48,14 @@ func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 	// Use TUILogger as the main logger (satisfies shared.Logger interface)
 	logger := shared.Logger(tuiLogger)
 
-	logger.Info("Initializing ghclone application",
+	logger.Info("Initializing repocloner application",
 		shared.StringField("version", "0.2.0"),
 		shared.StringField("go_version", runtime.Version()))
 
 	// Initialize GitHub client
 	githubClient := github.NewGitHubClient(&github.GitHubClientConfig{
 		Token:       config.Token,
-		UserAgent:   "ghclone/0.2",
+		UserAgent:   "repocloner/0.2",
 		Timeout:     30 * time.Second,
 		RateLimiter: github.NewTokenBucketRateLimiter(5000), // GitHub default limit
 		Logger:      logger.With(shared.StringField("component", "github_client")),
@@ -76,7 +76,7 @@ func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 	// Initialize Bitbucket client
 	bitbucketClient := bitbucket.NewBitbucketClient(&bitbucket.BitbucketClientConfig{
 		APIToken:    config.BitbucketAPIToken,
-		UserAgent:   "ghclone/0.2",
+		UserAgent:   "repocloner/0.2",
 		Timeout:     30 * time.Second,
 		RateLimiter: bitbucket.NewTokenBucketRateLimiter(1000), // Bitbucket default limit
 		Logger:      logger.With(shared.StringField("component", "bitbucket_client")),
@@ -201,9 +201,9 @@ func NewDefaultConfig() *Config {
 // RootCommand creates the root cobra command with Fang styling
 func NewRootCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "ghclone",
-		Short: "Concurrent GitHub and Bitbucket Repository Cloner",
-		Long: `ghclone is a high-performance, concurrent repository cloner built with Go.
+		Use:   "repocloner",
+		Short: "Concurrent Multi-Provider Repository Cloner",
+		Long: `repocloner is a high-performance, concurrent repository cloner built with Go.
 
 It provides enhanced terminal UI experiences with real-time progress tracking,
 structured logging, and efficient concurrent processing using worker pools.
@@ -218,22 +218,22 @@ Features:
   • Bitbucket API v2.0 support with API token authentication`,
 		Version: "0.2.0",
 		Example: `  # Clone all repositories from a GitHub user
-  ghclone clone user octocat
+  repocloner clone user octocat
 
   # Clone GitHub organization repositories with custom settings
-  ghclone clone org microsoft --concurrency 8 --skip-forks
+  repocloner clone org microsoft --concurrency 8 --skip-forks
 
   # Clone all repositories from a Bitbucket user
-  ghclone bitbucket user myusername
+  repocloner bitbucket user myusername
 
   # Clone Bitbucket workspace repositories
-  ghclone bitbucket workspace myworkspace --skip-forks
+  repocloner bitbucket workspace myworkspace --skip-forks
 
   # List repositories in JSON format
-  ghclone list user torvalds --format json --include-forks
+  repocloner list user torvalds --format json --include-forks
 
   # Generate shell completions
-  ghclone completion bash > /etc/bash_completion.d/ghclone`,
+  repocloner completion bash > /etc/bash_completion.d/repocloner`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}

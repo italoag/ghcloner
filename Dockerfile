@@ -36,11 +36,11 @@ RUN CGO_ENABLED=0 \
     -a \
     -installsuffix cgo \
     -ldflags="-w -s -X main.version=${VERSION} -X main.commit=${GIT_REV} -X main.date=${BUILD_DATE}" \
-    -o ghclone \
-    ./cmd/ghclone
+    -o repocloner \
+    ./cmd/repocloner
 
 # Verify the binary
-RUN ./ghclone --help
+RUN ./repocloner --help
 
 # Runtime stage
 FROM alpine:${ALPINE_VERSION}
@@ -57,43 +57,43 @@ RUN apk add --no-cache \
     tzdata
 
 # Create non-root user
-RUN addgroup -g 1001 -S ghclone && \
-    adduser -u 1001 -S ghclone -G ghclone
+RUN addgroup -g 1001 -S repocloner && \
+    adduser -u 1001 -S repocloner -G repocloner
 
 # Create necessary directories
-RUN mkdir -p /app /home/ghclone && \
-    chown -R ghclone:ghclone /app /home/ghclone
+RUN mkdir -p /app /home/repocloner && \
+    chown -R repocloner:repocloner /app /home/repocloner
 
 # Copy binary from builder
-COPY --from=builder /build/ghclone /app/ghclone
+COPY --from=builder /build/repocloner /app/repocloner
 
 # Copy CA certificates and timezone data
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 
 # Set working directory
-WORKDIR /home/ghclone
+WORKDIR /home/repocloner
 
 # Switch to non-root user
-USER ghclone
+USER repocloner
 
 # Set environment variables
 ENV PATH="/app:${PATH}" \
-    HOME="/home/ghclone" \
-    USER="ghclone" \
+    HOME="/home/repocloner" \
+    USER="repocloner" \
     VERSION="${VERSION}" \
     GIT_REV="${GIT_REV}" \
     BUILD_DATE="${BUILD_DATE}"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD ghclone --help || exit 1
+    CMD repocloner --help || exit 1
 
 # Add labels
-LABEL org.opencontainers.image.title="ghclone" \
-      org.opencontainers.image.description="A GitHub repository cloning tool with TUI interface" \
-      org.opencontainers.image.url="https://github.com/italoag/ghcloner" \
-      org.opencontainers.image.source="https://github.com/italoag/ghcloner" \
+LABEL org.opencontainers.image.title="repocloner" \
+      org.opencontainers.image.description="A multi-provider repository cloning tool with TUI interface" \
+      org.opencontainers.image.url="https://github.com/italoag/repocloner" \
+      org.opencontainers.image.source="https://github.com/italoag/repocloner" \
       org.opencontainers.image.version="${VERSION}" \
       org.opencontainers.image.revision="${GIT_REV}" \
       org.opencontainers.image.created="${BUILD_DATE}" \
@@ -101,5 +101,5 @@ LABEL org.opencontainers.image.title="ghclone" \
       org.opencontainers.image.vendor="Italo A. G."
 
 # Default command
-ENTRYPOINT ["ghclone"]
+ENTRYPOINT ["repocloner"]
 CMD ["--help"]

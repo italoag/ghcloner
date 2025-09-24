@@ -6,8 +6,8 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/interfaces/tui/models"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/interfaces/tui/models"
 )
 
 // AppView handles rendering of the application UI
@@ -103,7 +103,7 @@ var (
 // renderInitializing renders the initializing state
 func (v *AppView) renderInitializing() string {
 	return lipgloss.JoinVertical(lipgloss.Left,
-		titleStyle.Render("🚀 ghclone v0.2.0"),
+		titleStyle.Render("🚀 repocloner v0.2.0"),
 		headerStyle.Render("Initializing Application"),
 		infoStyle.Render("Setting up concurrent repository cloner..."),
 		helpStyle.Render("Press 'q' to quit"),
@@ -113,7 +113,7 @@ func (v *AppView) renderInitializing() string {
 // renderFetching renders the repository fetching state
 func (v *AppView) renderFetching() string {
 	return lipgloss.JoinVertical(lipgloss.Left,
-		titleStyle.Render("🚀 ghclone v0.2.0"),
+		titleStyle.Render("🚀 repocloner v0.2.0"),
 		headerStyle.Render("Fetching Repositories"),
 		infoStyle.Render("Retrieving repository list from GitHub..."),
 		statusStyle.Render("⏳ Please wait while we fetch the repositories"),
@@ -126,7 +126,7 @@ func (v *AppView) renderRepositoriesFetched() string {
 	count := v.model.GetRepositoryCount()
 
 	return lipgloss.JoinVertical(lipgloss.Left,
-		titleStyle.Render("🚀 ghclone v0.2.0"),
+		titleStyle.Render("🚀 repocloner v0.2.0"),
 		headerStyle.Render("Repositories Found"),
 		successStyle.Render(fmt.Sprintf("✓ Found %d repositories", count)),
 		infoStyle.Render("Starting concurrent cloning..."),
@@ -139,7 +139,7 @@ func (v *AppView) renderCloning() string {
 	progress := v.model.GetProgress()
 
 	var content []string
-	content = append(content, titleStyle.Render("🚀 ghclone v20..0"))
+	content = append(content, titleStyle.Render("🚀 repocloner v20..0"))
 	content = append(content, headerStyle.Render("Cloning Repositories"))
 
 	if progress != nil {
@@ -175,7 +175,7 @@ func (v *AppView) renderComplete() string {
 	elapsed := v.model.GetElapsedTime()
 
 	var content []string
-	content = append(content, titleStyle.Render("🚀 ghclone v0.2.0"))
+	content = append(content, titleStyle.Render("🚀 repocloner v0.2.0"))
 	content = append(content, headerStyle.Render("Cloning Completed"))
 
 	if progress != nil {
@@ -209,7 +209,7 @@ func (v *AppView) renderError() string {
 	err := v.model.GetError()
 
 	var content []string
-	content = append(content, titleStyle.Render("🚀 ghclone v0.2.0"))
+	content = append(content, titleStyle.Render("🚀 repocloner v0.2.0"))
 	content = append(content, headerStyle.Render("Error"))
 
 	if err != nil {
@@ -235,9 +235,9 @@ func (v *AppView) renderError() string {
 // renderQuitting renders the quitting state
 func (v *AppView) renderQuitting() string {
 	return lipgloss.JoinVertical(lipgloss.Left,
-		titleStyle.Render("🚀 ghclone v0.2.0"),
+		titleStyle.Render("🚀 repocloner v0.2.0"),
 		headerStyle.Render("Shutting Down"),
-		infoStyle.Render("Thanks for using ghclone!"),
+		infoStyle.Render("Thanks for using repocloner!"),
 		infoStyle.Render("Cleaning up resources..."),
 	)
 }
@@ -245,7 +245,7 @@ func (v *AppView) renderQuitting() string {
 // renderUnknown renders unknown states
 func (v *AppView) renderUnknown() string {
 	return lipgloss.JoinVertical(lipgloss.Left,
-		titleStyle.Render("🚀 ghclone v0.2.0"),
+		titleStyle.Render("🚀 repocloner v0.2.0"),
 		errorStyle.Render("Unknown state"),
 		helpStyle.Render("Press 'q' to quit"),
 	)

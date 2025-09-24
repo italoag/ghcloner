@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/italoag/ghcloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/domain/shared"
 )
 
 // LogEntry represents a single log entry for TUI display
@@ -342,7 +342,7 @@ type TUILoggerConfig struct {
 func NewTUILogger(config *TUILoggerConfig) (*TUILogger, error) {
 	if config == nil {
 		config = &TUILoggerConfig{
-			LogFile:     "ghclone.log",
+			LogFile:     "repocloner.log",
 			Level:       "info",
 			BufferSize:  50,
 			Development: true,

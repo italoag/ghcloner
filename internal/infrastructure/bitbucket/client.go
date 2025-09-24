@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/shared"
 )
 
 // BitbucketAPIResponse represents the structure of Bitbucket API responses
@@ -103,7 +103,7 @@ func NewBitbucketClient(config *BitbucketClientConfig) *BitbucketClient {
 		config.BaseURL = "https://api.bitbucket.org/2.0"
 	}
 	if config.UserAgent == "" {
-		config.UserAgent = "ghclone/1.0"
+		config.UserAgent = "repocloner/1.0"
 	}
 	if config.Timeout == 0 {
 		config.Timeout = 30 * time.Second

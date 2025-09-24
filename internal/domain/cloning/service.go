@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/shared"
 )
 
 // Cloning domain errors
@@ -86,7 +86,7 @@ func (s *DomainCloneService) ValidateDestination(path string) error {
 	}
 
 	// Test write permissions by trying to create a temporary file
-	tempFile := filepath.Join(parentDir, ".ghclone_test")
+	tempFile := filepath.Join(parentDir, ".repocloner_test")
 	if file, err := os.Create(tempFile); err != nil {
 		return fmt.Errorf("%w: %v", ErrDestinationNotWritable, err)
 	} else {

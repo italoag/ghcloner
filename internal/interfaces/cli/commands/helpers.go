@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/italoag/ghcloner/internal/application/usecases"
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/domain/shared"
-	"github.com/italoag/ghcloner/internal/infrastructure/github"
-	"github.com/italoag/ghcloner/internal/infrastructure/logging"
+	"github.com/italoag/repocloner/internal/application/usecases"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/infrastructure/github"
+	"github.com/italoag/repocloner/internal/infrastructure/logging"
 )
 
 // ListCommand handles repository listing operations
@@ -39,7 +39,7 @@ func (l *ListCommand) Description() string {
 
 // Usage returns the command usage
 func (l *ListCommand) Usage() string {
-	return `Usage: ghclone list [options] <type> <owner>
+	return `Usage: repocloner list [options] <type> <owner>
 
 ARGUMENTS:
   type    Repository owner type ('user' or 'org')
@@ -58,10 +58,10 @@ OPTIONS:
   --updated-after <date>  Filter repositories updated after date (YYYY-MM-DD)
 
 EXAMPLES:
-  ghclone list user octocat
-  ghclone list org microsoft --format json
-  ghclone list user torvalds --include-forks --sort size
-  ghclone list org kubernetes --language go --limit 20
+  repocloner list user octocat
+  repocloner list org microsoft --format json
+  repocloner list user torvalds --include-forks --sort size
+  repocloner list org kubernetes --language go --limit 20
 `
 }
 
@@ -227,7 +227,7 @@ func (l *ListCommand) executeList(ctx context.Context, config *ListConfig) error
 	// Initialize GitHub client
 	githubClient := github.NewGitHubClient(&github.GitHubClientConfig{
 		Token:       config.Token,
-		UserAgent:   "ghclone/2.0",
+		UserAgent:   "repocloner/2.0",
 		Timeout:     30 * time.Second,
 		RateLimiter: github.NewTokenBucketRateLimiter(5000),
 		Logger:      logger,
@@ -440,24 +440,24 @@ func (h *HelpCommand) Description() string {
 
 // Usage returns the command usage
 func (h *HelpCommand) Usage() string {
-	return "Usage: ghclone help [command]"
+	return "Usage: repocloner help [command]"
 }
 
 // Execute executes the help command
 func (h *HelpCommand) Execute(ctx context.Context, args []string) error {
 	if len(args) == 0 {
 		// Show general help
-		fmt.Println("ghclone v0.2.0 - Concurrent GitHub Repository Cloner")
+		fmt.Println("repocloner v0.2.0 - Concurrent GitHub Repository Cloner")
 		fmt.Println()
 		fmt.Println("USAGE:")
-		fmt.Println("  ghclone <command> [arguments]")
+		fmt.Println("  repocloner <command> [arguments]")
 		fmt.Println()
 		fmt.Println("COMMANDS:")
 		for name, cmd := range h.commands {
 			fmt.Printf("  %-10s %s\n", name, cmd.Description())
 		}
 		fmt.Println()
-		fmt.Println("Use 'ghclone help <command>' for more information about a command.")
+		fmt.Println("Use 'repocloner help <command>' for more information about a command.")
 		return nil
 	}
 
@@ -492,12 +492,12 @@ func (v *VersionCommand) Description() string {
 
 // Usage returns the command usage
 func (v *VersionCommand) Usage() string {
-	return "Usage: ghclone version"
+	return "Usage: repocloner version"
 }
 
 // Execute executes the version command
 func (v *VersionCommand) Execute(ctx context.Context, args []string) error {
-	fmt.Println("ghclone v0.2.0")
+	fmt.Println("repocloner v0.2.0")
 	fmt.Printf("Go version: %s\n", "go1.24.3")
 	fmt.Println("Optimized with:")
 	fmt.Println("  - Concurrent processing with ants worker pool")

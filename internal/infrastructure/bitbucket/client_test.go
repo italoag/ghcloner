@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/infrastructure/logging"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/infrastructure/logging"
 )
 
 func TestNewBitbucketClient(t *testing.T) {
@@ -30,7 +30,7 @@ func TestNewBitbucketClient(t *testing.T) {
 
 	assert.NotNil(t, client)
 	assert.Equal(t, "https://api.bitbucket.org/2.0", client.baseURL)
-	assert.Equal(t, "ghclone/1.0", client.userAgent)
+	assert.Equal(t, "repocloner/1.0", client.userAgent)
 	assert.Equal(t, "test-api-token", client.apiToken)
 	assert.Equal(t, 30*time.Second, client.httpClient.Timeout)
 }

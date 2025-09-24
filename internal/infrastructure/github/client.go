@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/shared"
 )
 
 // GitHubAPIResponse represents the structure of GitHub API responses
@@ -67,7 +67,7 @@ func NewGitHubClient(config *GitHubClientConfig) *GitHubClient {
 		config.BaseURL = "https://api.github.com"
 	}
 	if config.UserAgent == "" {
-		config.UserAgent = "ghclone/1.0"
+		config.UserAgent = "repocloner/1.0"
 	}
 	if config.Timeout == 0 {
 		config.Timeout = 30 * time.Second

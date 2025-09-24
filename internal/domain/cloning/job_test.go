@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/italoag/ghcloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/repository"
 )
 
 func TestNewCloneJob(t *testing.T) {

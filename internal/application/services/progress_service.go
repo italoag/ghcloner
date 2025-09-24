@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/domain/shared"
 )
 
 // ProgressService manages progress tracking for cloning operations

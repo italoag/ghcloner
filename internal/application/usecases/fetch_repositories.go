@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/italoag/ghcloner/internal/domain/repository"
-	"github.com/italoag/ghcloner/internal/domain/shared"
-	"github.com/italoag/ghcloner/internal/infrastructure/bitbucket"
-	"github.com/italoag/ghcloner/internal/infrastructure/github"
+	"github.com/italoag/repocloner/internal/domain/repository"
+	"github.com/italoag/repocloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/infrastructure/bitbucket"
+	"github.com/italoag/repocloner/internal/infrastructure/github"
 )
 
 // FetchRepositoriesRequest represents the input for fetching repositories

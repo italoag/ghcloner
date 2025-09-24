@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/italoag/ghcloner/internal/domain/cloning"
-	"github.com/italoag/ghcloner/internal/domain/shared"
+	"github.com/italoag/repocloner/internal/domain/cloning"
+	"github.com/italoag/repocloner/internal/domain/shared"
 )
 
 // GitClient handles Git operations
