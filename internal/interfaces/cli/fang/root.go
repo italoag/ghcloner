@@ -75,8 +75,7 @@ func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 
 	// Initialize Bitbucket client
 	bitbucketClient := bitbucket.NewBitbucketClient(&bitbucket.BitbucketClientConfig{
-		Username:    config.BitbucketUsername,
-		AppPassword: config.BitbucketAppPassword,
+		APIToken:    config.BitbucketAPIToken,
 		UserAgent:   "ghclone/0.2",
 		Timeout:     30 * time.Second,
 		RateLimiter: bitbucket.NewTokenBucketRateLimiter(1000), // Bitbucket default limit
@@ -84,7 +83,7 @@ func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 	})
 
 	// Validate Bitbucket credentials if provided
-	if config.BitbucketUsername != "" && config.BitbucketAppPassword != "" {
+	if config.BitbucketAPIToken != "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
@@ -183,12 +182,11 @@ func (app *Application) Close() error {
 
 // Config holds application configuration
 type Config struct {
-	Token                string // GitHub token
-	BitbucketUsername    string // Bitbucket username
-	BitbucketAppPassword string // Bitbucket app password
-	Concurrency          int
-	LogLevel             string
-	BaseDir              string
+	Token             string // GitHub token
+	BitbucketAPIToken string // Bitbucket API token
+	Concurrency       int
+	LogLevel          string
+	BaseDir           string
 }
 
 // NewDefaultConfig creates default configuration
@@ -217,7 +215,7 @@ Features:
   • Support for GitHub (users and organizations) and Bitbucket (users and workspaces)
   • Advanced filtering and configuration options
   • GitHub API rate limiting and token validation
-  • Bitbucket API v2.0 support with app password authentication`,
+  • Bitbucket API v2.0 support with API token authentication`,
 		Version: "0.2.0",
 		Example: `  # Clone all repositories from a GitHub user
   ghclone clone user octocat
@@ -242,8 +240,7 @@ Features:
 
 	// Add global flags
 	cmd.PersistentFlags().String("token", "", "GitHub personal access token (env: GITHUB_TOKEN)")
-	cmd.PersistentFlags().String("bitbucket-username", "", "Bitbucket username (env: BITBUCKET_USERNAME)")
-	cmd.PersistentFlags().String("bitbucket-password", "", "Bitbucket app password (env: BITBUCKET_APP_PASSWORD)")
+	cmd.PersistentFlags().String("bitbucket-api-token", "", "Bitbucket API token (env: BITBUCKET_API_TOKEN)")
 	cmd.PersistentFlags().String("log-level", "info", "Log level (debug, info, warn, error)")
 	cmd.PersistentFlags().Int("concurrency", runtime.NumCPU()*2, "Number of concurrent workers")
 	cmd.PersistentFlags().String("base-dir", ".", "Base directory for operations")
@@ -272,12 +269,8 @@ func getGlobalConfig(cmd *cobra.Command) (*Config, error) {
 		config.Token = token
 	}
 
-	if username, err := cmd.Flags().GetString("bitbucket-username"); err == nil && username != "" {
-		config.BitbucketUsername = username
-	}
-
-	if password, err := cmd.Flags().GetString("bitbucket-password"); err == nil && password != "" {
-		config.BitbucketAppPassword = password
+	if token, err := cmd.Flags().GetString("bitbucket-api-token"); err == nil && token != "" {
+		config.BitbucketAPIToken = token
 	}
 
 	if logLevel, err := cmd.Flags().GetString("log-level"); err == nil && logLevel != "" {

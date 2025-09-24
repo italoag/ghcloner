@@ -22,9 +22,8 @@ func TestNewBitbucketClient(t *testing.T) {
 	defer func() { _ = logger.Close() }()
 
 	config := &BitbucketClientConfig{
-		Username:    "testuser",
-		AppPassword: "testpass",
-		Logger:      logger,
+		APIToken: "test-api-token",
+		Logger:   logger,
 	}
 
 	client := NewBitbucketClient(config)
@@ -32,8 +31,7 @@ func TestNewBitbucketClient(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.Equal(t, "https://api.bitbucket.org/2.0", client.baseURL)
 	assert.Equal(t, "ghclone/1.0", client.userAgent)
-	assert.Equal(t, "testuser", client.username)
-	assert.Equal(t, "testpass", client.appPassword)
+	assert.Equal(t, "test-api-token", client.apiToken)
 	assert.Equal(t, 30*time.Second, client.httpClient.Timeout)
 }
 
@@ -187,10 +185,9 @@ func TestBitbucketClient_FetchRepositories_Integration(t *testing.T) {
 	t.Skip("Integration test - requires real Bitbucket credentials")
 
 	// This test would require real Bitbucket credentials
-	username := "your-bitbucket-username"
-	appPassword := "your-app-password"
+	apiToken := "your-api-token"
 
-	if username == "your-bitbucket-username" {
+	if apiToken == "your-api-token" {
 		t.Skip("Please set real credentials to run integration test")
 	}
 
@@ -203,9 +200,8 @@ func TestBitbucketClient_FetchRepositories_Integration(t *testing.T) {
 	defer func() { _ = logger.Close() }()
 
 	client := NewBitbucketClient(&BitbucketClientConfig{
-		Username:    username,
-		AppPassword: appPassword,
-		Logger:      logger,
+		APIToken: apiToken,
+		Logger:   logger,
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -214,7 +210,7 @@ func TestBitbucketClient_FetchRepositories_Integration(t *testing.T) {
 	// Test fetching user repositories
 	repos, err := client.FetchRepositories(
 		ctx,
-		username,
+		"your-workspace-or-user",
 		repository.RepositoryTypeBitbucketUser,
 		repository.NewRepositoryFilter(),
 		&repository.PaginationOptions{Page: 1, PerPage: 10},

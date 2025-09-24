@@ -19,7 +19,7 @@
 - **📁 Flexible Organization**: Support for GitHub (users/orgs) and Bitbucket (users/workspaces)
 - **🛠️ Multiple Interfaces**: Choose between CLI and TUI (Terminal User Interface)
 - **📋 Multiple Output Formats**: Export repository lists as table, JSON, or CSV
-- **🔐 Token Support**: GitHub API token and Bitbucket app password integration with rate limiting
+- **🔐 Token Support**: GitHub API token and Bitbucket API token integration with rate limiting
 - **🏗️ Domain-Driven Design**: Clean architecture with SOLID principles
 - **📝 Structured Logging**: Comprehensive logging with configurable levels
 - **🐳 Docker Support**: Ready-to-use Docker images
@@ -137,10 +137,9 @@ ghclone bitbucket [type] [owner] [flags]
 - `workspace` or `workspaces` - Clone from a Bitbucket workspace
 
 **Authentication:**
-Requires Bitbucket username and app password:
+Requires Bitbucket API token:
 ```bash
-export BITBUCKET_USERNAME=your-username
-export BITBUCKET_APP_PASSWORD=your-app-password
+export BITBUCKET_API_TOKEN=your-api-token
 ```
 
 **Examples:**
@@ -242,21 +241,20 @@ ghclone clone user octocat --token "your_token_here"
 
 #### Bitbucket Authentication
 
-ghclone supports Bitbucket app passwords for authentication:
+ghclone supports Bitbucket API tokens for authentication:
 
 ```bash
-# Set via environment variables
-export BITBUCKET_USERNAME="your-username"
-export BITBUCKET_APP_PASSWORD="your-app-password"
+# Set via environment variable
+export BITBUCKET_API_TOKEN="your-api-token"
 
 # Or pass directly
-ghclone bitbucket user myuser --bitbucket-username "your-username" --bitbucket-password "your-app-password"
+ghclone bitbucket user myuser --bitbucket-api-token "your-api-token"
 ```
 
-**Creating a Bitbucket App Password:**
-1. Go to Bitbucket Settings → App passwords
-2. Create a new app password with `Repositories: Read` permission
-3. Copy the username and app password and set them as environment variables
+**Creating a Bitbucket API Token:**
+1. Go to Bitbucket Settings → Personal Bitbucket settings → API tokens
+2. Create a new API token with `Repositories: Read` permission
+3. Copy the API token and set it as an environment variable
 
 ### 🎨 Terminal UI Features
 

@@ -81,8 +81,7 @@ type RateLimitInfo struct {
 type BitbucketClient struct {
 	httpClient  *http.Client
 	baseURL     string
-	username    string
-	appPassword string
+	apiToken    string
 	userAgent   string
 	rateLimiter RateLimiter
 	logger      shared.Logger
@@ -90,8 +89,7 @@ type BitbucketClient struct {
 
 // BitbucketClientConfig holds configuration for Bitbucket client
 type BitbucketClientConfig struct {
-	Username    string
-	AppPassword string
+	APIToken    string
 	BaseURL     string
 	UserAgent   string
 	Timeout     time.Duration
@@ -116,8 +114,7 @@ func NewBitbucketClient(config *BitbucketClientConfig) *BitbucketClient {
 			Timeout: config.Timeout,
 		},
 		baseURL:     config.BaseURL,
-		username:    config.Username,
-		appPassword: config.AppPassword,
+		apiToken:    config.APIToken,
 		userAgent:   config.UserAgent,
 		rateLimiter: config.RateLimiter,
 		logger:      config.Logger,
@@ -210,8 +207,8 @@ func (c *BitbucketClient) fetchRepositoryPage(
 	req.Header.Set("User-Agent", c.userAgent)
 
 	// Set authentication
-	if c.username != "" && c.appPassword != "" {
-		req.SetBasicAuth(c.username, c.appPassword)
+	if c.apiToken != "" {
+		req.Header.Set("Authorization", "Bearer "+c.apiToken)
 	}
 
 	// Make request
@@ -337,8 +334,8 @@ func (c *BitbucketClient) GetRateLimitInfo(ctx context.Context) (*RateLimitInfo,
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", c.userAgent)
 
-	if c.username != "" && c.appPassword != "" {
-		req.SetBasicAuth(c.username, c.appPassword)
+	if c.apiToken != "" {
+		req.Header.Set("Authorization", "Bearer "+c.apiToken)
 	}
 
 	resp, err := c.httpClient.Do(req)
@@ -370,8 +367,8 @@ func (c *BitbucketClient) ValidateCredentials(ctx context.Context) error {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", c.userAgent)
 
-	if c.username != "" && c.appPassword != "" {
-		req.SetBasicAuth(c.username, c.appPassword)
+	if c.apiToken != "" {
+		req.Header.Set("Authorization", "Bearer "+c.apiToken)
 	}
 
 	resp, err := c.httpClient.Do(req)

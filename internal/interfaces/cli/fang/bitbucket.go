@@ -42,8 +42,8 @@ Supports both individual users and workspaces. Uses Bitbucket's API v2.0 to fetc
 repository information and performs concurrent cloning with real-time progress tracking.
 
 Authentication:
-  Requires Bitbucket username and app password for private repositories.
-  Set BITBUCKET_USERNAME and BITBUCKET_APP_PASSWORD environment variables.
+  Requires Bitbucket API token for private repositories.
+  Set BITBUCKET_API_TOKEN environment variable.
 
 Examples:
   # Clone all repositories from a user
@@ -97,17 +97,14 @@ func runBitbucketCloneCommand(cmd *cobra.Command, args []string, cloneConfig *Bi
 		return fmt.Errorf("failed to get global configuration: %w", err)
 	}
 
-	// Override Bitbucket credentials from environment if not set
-	if globalConfig.BitbucketUsername == "" {
-		globalConfig.BitbucketUsername = os.Getenv("BITBUCKET_USERNAME")
-	}
-	if globalConfig.BitbucketAppPassword == "" {
-		globalConfig.BitbucketAppPassword = os.Getenv("BITBUCKET_APP_PASSWORD")
+	// Override Bitbucket API token from environment if not set
+	if globalConfig.BitbucketAPIToken == "" {
+		globalConfig.BitbucketAPIToken = os.Getenv("BITBUCKET_API_TOKEN")
 	}
 
-	// Validate Bitbucket credentials are provided
-	if globalConfig.BitbucketUsername == "" || globalConfig.BitbucketAppPassword == "" {
-	return fmt.Errorf("bitbucket credentials required: set BITBUCKET_USERNAME and BITBUCKET_APP_PASSWORD environment variables")
+	// Validate Bitbucket API token is provided
+	if globalConfig.BitbucketAPIToken == "" {
+		return fmt.Errorf("bitbucket API token required: set BITBUCKET_API_TOKEN environment variable")
 	}
 
 	// Initialize application
