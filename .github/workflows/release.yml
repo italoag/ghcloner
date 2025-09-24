@@ -77,7 +77,7 @@ jobs:
           
           ### Using Go
           ```bash
-          go install github.com/italoag/repoclonerr/cmd/repocloner@${{ steps.version.outputs.version }}
+          go install github.com/italoag/repocloner/cmd/repocloner@${{ steps.version.outputs.version }}
           ```
           
           ### Docker
