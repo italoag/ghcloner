@@ -22,6 +22,7 @@ func TestNewBitbucketClient(t *testing.T) {
 	defer func() { _ = logger.Close() }()
 
 	config := &BitbucketClientConfig{
+		Username: "test-user",
 		APIToken: "test-api-token",
 		Logger:   logger,
 	}
@@ -31,6 +32,7 @@ func TestNewBitbucketClient(t *testing.T) {
 	assert.NotNil(t, client)
 	assert.Equal(t, "https://api.bitbucket.org/2.0", client.baseURL)
 	assert.Equal(t, "repocloner/1.0", client.userAgent)
+	assert.Equal(t, "test-user", client.username)
 	assert.Equal(t, "test-api-token", client.apiToken)
 	assert.Equal(t, 30*time.Second, client.httpClient.Timeout)
 }
@@ -200,6 +202,7 @@ func TestBitbucketClient_FetchRepositories_Integration(t *testing.T) {
 	defer func() { _ = logger.Close() }()
 
 	client := NewBitbucketClient(&BitbucketClientConfig{
+		Username: "test-user",
 		APIToken: apiToken,
 		Logger:   logger,
 	})

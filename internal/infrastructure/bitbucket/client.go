@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/italoag/repocloner/internal/domain/repository"
@@ -81,6 +82,8 @@ type RateLimitInfo struct {
 type BitbucketClient struct {
 	httpClient  *http.Client
 	baseURL     string
+	username    string // For Git operations
+	email       string // For API operations
 	apiToken    string
 	userAgent   string
 	rateLimiter RateLimiter
@@ -89,6 +92,8 @@ type BitbucketClient struct {
 
 // BitbucketClientConfig holds configuration for Bitbucket client
 type BitbucketClientConfig struct {
+	Username    string // For Git operations: "x-bitbucket-api-token-auth"
+	Email       string // For API operations: Atlassian account email
 	APIToken    string
 	BaseURL     string
 	UserAgent   string
@@ -114,6 +119,8 @@ func NewBitbucketClient(config *BitbucketClientConfig) *BitbucketClient {
 			Timeout: config.Timeout,
 		},
 		baseURL:     config.BaseURL,
+		username:    config.Username,
+		email:       config.Email,
 		apiToken:    config.APIToken,
 		userAgent:   config.UserAgent,
 		rateLimiter: config.RateLimiter,
@@ -176,11 +183,15 @@ func (c *BitbucketClient) fetchRepositoryPage(
 	page, perPage int,
 ) ([]*repository.Repository, bool, error) {
 	// Construct URL based on repository type
+	// Both users and workspaces use the same endpoint in Bitbucket API v2.0
+	// The API automatically resolves whether the owner is a user or workspace
 	var url string
 	switch repoType {
 	case repository.RepositoryTypeBitbucketUser:
+		// For users: GET /2.0/repositories/{username}
 		url = fmt.Sprintf("%s/repositories/%s", c.baseURL, owner)
 	case repository.RepositoryTypeBitbucketWorkspace:
+		// For workspaces: GET /2.0/repositories/{workspace}
 		url = fmt.Sprintf("%s/repositories/%s", c.baseURL, owner)
 	default:
 		return nil, false, fmt.Errorf("unsupported repository type: %s", repoType)
@@ -206,10 +217,27 @@ func (c *BitbucketClient) fetchRepositoryPage(
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", c.userAgent)
 
-	// Set authentication
+	// Set authentication - use Basic Auth with email:api_token for API calls
 	if c.apiToken != "" {
-		req.Header.Set("Authorization", "Bearer "+c.apiToken)
+		// For API calls, use Atlassian account email as per Bitbucket documentation
+		authUsername := c.email
+		if authUsername == "" {
+			c.logger.Warn("No email provided for Bitbucket API authentication, using fallback username")
+			authUsername = c.username
+			if authUsername == "" {
+				authUsername = "x-bitbucket-api-token-auth"
+			}
+		}
+		c.logger.Debug("Using authentication", shared.StringField("auth_username", authUsername))
+		req.SetBasicAuth(authUsername, c.apiToken)
 	}
+
+	// Debug logging
+	c.logger.Debug("Making Bitbucket API request",
+		shared.StringField("url", url),
+		shared.StringField("method", "GET"),
+		shared.StringField("user_agent", c.userAgent),
+		shared.StringField("has_auth", fmt.Sprintf("%t", c.apiToken != "")))
 
 	// Make request
 	resp, err := c.httpClient.Do(req)
@@ -218,11 +246,21 @@ func (c *BitbucketClient) fetchRepositoryPage(
 	}
 	defer func() { _ = resp.Body.Close() }()
 
+	// Debug response
+	c.logger.Debug("Bitbucket API response",
+		shared.IntField("status_code", resp.StatusCode),
+		shared.StringField("content_type", resp.Header.Get("Content-Type")),
+		shared.StringField("rate_limit", resp.Header.Get("X-RateLimit-Remaining")))
+
 	// Update rate limiter from response
 	c.updateRateLimitFromResponse(resp)
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
+		c.logger.Error("Bitbucket API request failed",
+			shared.IntField("status_code", resp.StatusCode),
+			shared.StringField("response_body", string(body)),
+			shared.StringField("url", url))
 		return nil, false, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
 
@@ -256,7 +294,7 @@ func (c *BitbucketClient) fetchRepositoryPage(
 
 // convertToDomainRepository converts Bitbucket API response to domain repository
 func (c *BitbucketClient) convertToDomainRepository(apiRepo *BitbucketAPIResponse) (*repository.Repository, error) {
-	// Get clone URL (prefer HTTPS)
+	// Get clone URL (prefer HTTPS) and modify it to include API token authentication
 	var cloneURL string
 	for _, link := range apiRepo.Links.Clone {
 		if link.Name == "https" {
@@ -266,6 +304,21 @@ func (c *BitbucketClient) convertToDomainRepository(apiRepo *BitbucketAPIRespons
 	}
 	if cloneURL == "" && len(apiRepo.Links.Clone) > 0 {
 		cloneURL = apiRepo.Links.Clone[0].Href
+	}
+
+	// Modify clone URL to include API token authentication
+	// From: https://bitbucket.org/workspace/repo.git
+	// To:   https://x-bitbucket-api-token-auth:api_token@bitbucket.org/workspace/repo.git
+	if cloneURL != "" && c.apiToken != "" {
+		// Replace https:// with https://x-bitbucket-api-token-auth:api_token@
+		if strings.HasPrefix(cloneURL, "https://bitbucket.org/") {
+			username := c.username
+			if username == "" {
+				username = "x-bitbucket-api-token-auth"
+			}
+			cloneURL = strings.Replace(cloneURL, "https://bitbucket.org/",
+				fmt.Sprintf("https://%s:%s@bitbucket.org/", username, c.apiToken), 1)
+		}
 	}
 
 	// Get main branch name
@@ -335,7 +388,15 @@ func (c *BitbucketClient) GetRateLimitInfo(ctx context.Context) (*RateLimitInfo,
 	req.Header.Set("User-Agent", c.userAgent)
 
 	if c.apiToken != "" {
-		req.Header.Set("Authorization", "Bearer "+c.apiToken)
+		// For API calls, use Atlassian account email
+		authUsername := c.email
+		if authUsername == "" {
+			authUsername = c.username
+			if authUsername == "" {
+				authUsername = "x-bitbucket-api-token-auth"
+			}
+		}
+		req.SetBasicAuth(authUsername, c.apiToken)
 	}
 
 	resp, err := c.httpClient.Do(req)
@@ -357,6 +418,10 @@ func (c *BitbucketClient) GetRateLimitInfo(ctx context.Context) (*RateLimitInfo,
 
 // ValidateCredentials checks if the provided credentials are valid
 func (c *BitbucketClient) ValidateCredentials(ctx context.Context) error {
+	if c.apiToken == "" {
+		return fmt.Errorf("API token is empty")
+	}
+
 	url := fmt.Sprintf("%s/user", c.baseURL)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -367,9 +432,20 @@ func (c *BitbucketClient) ValidateCredentials(ctx context.Context) error {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", c.userAgent)
 
-	if c.apiToken != "" {
-		req.Header.Set("Authorization", "Bearer "+c.apiToken)
+	// For API validation, use Atlassian account email
+	authUsername := c.email
+	if authUsername == "" {
+		authUsername = c.username
+		if authUsername == "" {
+			authUsername = "x-bitbucket-api-token-auth"
+		}
 	}
+	req.SetBasicAuth(authUsername, c.apiToken)
+
+	c.logger.Debug("Validating Bitbucket credentials",
+		shared.StringField("endpoint", url),
+		shared.StringField("auth_username", authUsername),
+		shared.StringField("using_email", fmt.Sprintf("%t", c.email != "")))
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -378,11 +454,18 @@ func (c *BitbucketClient) ValidateCredentials(ctx context.Context) error {
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusUnauthorized {
-		return fmt.Errorf("invalid credentials")
+		body, _ := io.ReadAll(resp.Body)
+		c.logger.Error("Bitbucket authentication failed",
+			shared.StringField("response_body", string(body)))
+		return fmt.Errorf("invalid API token or insufficient permissions. Check that your token has 'Repositories: Read' permission")
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("API request failed with status %d", resp.StatusCode)
+		body, _ := io.ReadAll(resp.Body)
+		c.logger.Error("Bitbucket validation failed",
+			shared.IntField("status_code", resp.StatusCode),
+			shared.StringField("response_body", string(body)))
+		return fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
 
 	return nil

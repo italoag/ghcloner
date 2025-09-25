@@ -75,6 +75,8 @@ func NewApplication(config *Config) (*Application, *logging.TUILogger, error) {
 
 	// Initialize Bitbucket client
 	bitbucketClient := bitbucket.NewBitbucketClient(&bitbucket.BitbucketClientConfig{
+		Username:    "x-bitbucket-api-token-auth", // For Git operations
+		Email:       config.BitbucketEmail,        // For API operations
 		APIToken:    config.BitbucketAPIToken,
 		UserAgent:   "repocloner/0.2",
 		Timeout:     30 * time.Second,
@@ -184,6 +186,7 @@ func (app *Application) Close() error {
 type Config struct {
 	Token             string // GitHub token
 	BitbucketAPIToken string // Bitbucket API token
+	BitbucketEmail    string // Bitbucket Atlassian account email
 	Concurrency       int
 	LogLevel          string
 	BaseDir           string
@@ -241,6 +244,7 @@ Features:
 	// Add global flags
 	cmd.PersistentFlags().String("token", "", "GitHub personal access token (env: GITHUB_TOKEN)")
 	cmd.PersistentFlags().String("bitbucket-api-token", "", "Bitbucket API token (env: BITBUCKET_API_TOKEN)")
+	cmd.PersistentFlags().String("bitbucket-email", "", "Bitbucket Atlassian account email (env: BITBUCKET_EMAIL)")
 	cmd.PersistentFlags().String("log-level", "info", "Log level (debug, info, warn, error)")
 	cmd.PersistentFlags().Int("concurrency", runtime.NumCPU()*2, "Number of concurrent workers")
 	cmd.PersistentFlags().String("base-dir", ".", "Base directory for operations")
@@ -271,6 +275,10 @@ func getGlobalConfig(cmd *cobra.Command) (*Config, error) {
 
 	if token, err := cmd.Flags().GetString("bitbucket-api-token"); err == nil && token != "" {
 		config.BitbucketAPIToken = token
+	}
+
+	if email, err := cmd.Flags().GetString("bitbucket-email"); err == nil && email != "" {
+		config.BitbucketEmail = email
 	}
 
 	if logLevel, err := cmd.Flags().GetString("log-level"); err == nil && logLevel != "" {

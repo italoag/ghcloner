@@ -42,8 +42,11 @@ Supports both individual users and workspaces. Uses Bitbucket's API v2.0 to fetc
 repository information and performs concurrent cloning with real-time progress tracking.
 
 Authentication:
-  Requires Bitbucket API token for private repositories.
-  Set BITBUCKET_API_TOKEN environment variable.
+  Requires Bitbucket API token and Atlassian account email.
+  Set BITBUCKET_API_TOKEN and BITBUCKET_EMAIL environment variables.
+  
+  Your Atlassian account email can be found under Email Aliases on your
+  Bitbucket Personal settings page.
 
 Examples:
   # Clone all repositories from a user
@@ -97,14 +100,20 @@ func runBitbucketCloneCommand(cmd *cobra.Command, args []string, cloneConfig *Bi
 		return fmt.Errorf("failed to get global configuration: %w", err)
 	}
 
-	// Override Bitbucket API token from environment if not set
+	// Override Bitbucket credentials from environment if not set
 	if globalConfig.BitbucketAPIToken == "" {
 		globalConfig.BitbucketAPIToken = os.Getenv("BITBUCKET_API_TOKEN")
 	}
+	if globalConfig.BitbucketEmail == "" {
+		globalConfig.BitbucketEmail = os.Getenv("BITBUCKET_EMAIL")
+	}
 
-	// Validate Bitbucket API token is provided
+	// Validate Bitbucket credentials are provided
 	if globalConfig.BitbucketAPIToken == "" {
 		return fmt.Errorf("bitbucket API token required: set BITBUCKET_API_TOKEN environment variable")
+	}
+	if globalConfig.BitbucketEmail == "" {
+		return fmt.Errorf("bitbucket email required: set BITBUCKET_EMAIL environment variable with your Atlassian account email")
 	}
 
 	// Initialize application
